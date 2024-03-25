@@ -1,4 +1,4 @@
-﻿namespace Lua14.Mod;
+﻿namespace Lua14.Loader;
 
 internal sealed class LuaFile
 {

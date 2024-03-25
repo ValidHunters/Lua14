@@ -1,26 +1,27 @@
-﻿using NLua;
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using System.Reflection;
 using System.Text.Json;
 
-namespace Lua14.Mod;
+namespace Lua14.Loader;
 
-internal sealed class LuaLoader
+internal static class LuaLoader
 {
-    public void Initialize()
+    public static string GetModsFolderPath()
     {
         var currentAssemblyPath = Assembly.GetExecutingAssembly().Location;
         var marseyPath = Path.GetDirectoryName(currentAssemblyPath) ?? throw new Exception("Wrong dll location");
         var luaModsPath = Path.Combine(marseyPath, "LuaMods");
 
-        InitFolder(luaModsPath);
-
-        var lua = new Lua();
-        lua.DoFile
+        return luaModsPath;
     }
 
-    private void InitFolder(string path)
+    public static List<LuaMod> ReadFolder(string path)
     {
+        if (!Directory.Exists(path))
+            Directory.CreateDirectory(path);
+
+        List<LuaMod> mods = [];
+
         var files = Directory.EnumerateFiles(path);
         foreach (var file in files)
         {
@@ -28,10 +29,13 @@ internal sealed class LuaLoader
             if (fileExtension != ".zip")
                 continue;
 
-            ReadZip(file);
+            LuaMod mod = ReadZip(file);
+            mods.Add(mod);
         }
+
+        return mods;
     }
-    private LuaMod ReadZip(string path)
+    private static LuaMod ReadZip(string path)
     {
         ZipArchive archive = ZipFile.OpenRead(path);
 
@@ -65,14 +69,16 @@ internal sealed class LuaLoader
 
         if (config == null)
             throw new Exception($"Unable to load config from ${path}");
+        if (entries.Count == 0)
+            throw new Exception($"Zero lua files loaded from ${path}");
 
         return new LuaMod(config, entries);
     }
-    private LuaConfig ReadConfig(Stream configStream)
+    private static LuaConfig ReadConfig(Stream configStream)
     {
         return JsonSerializer.Deserialize<LuaConfig>(configStream) ?? throw new Exception("Cant deserialize the json config file?");
     }
-    private LuaFile ReadLuaFile(Stream fileStream, string filePath)
+    private static LuaFile ReadLuaFile(Stream fileStream, string filePath)
     {
         StreamReader reader = new StreamReader(fileStream);
         string content = reader.ReadToEnd();
