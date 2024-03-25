@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Library</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+		<PackageReference Include="Lib.Harmony" Version="2.3.1.1" />
+		<PackageReference Include="NLua" Version="1.7.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="Content.Client">
+			<HintPath>..\..\space-station-14\bin\Content.Client\Content.Client.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="Content.Shared">
+			<HintPath>..\..\space-station-14\bin\Content.Client\Content.Shared.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="Robust.Client">
+			<HintPath>..\..\space-station-14\bin\Content.Client\Robust.Client.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="Robust.Shared">
+			<HintPath>..\..\space-station-14\bin\Content.Client\Robust.Shared.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="Robust.Shared.Maths">
+			<HintPath>..\..\space-station-14\bin\Content.Client\Robust.Shared.Maths.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+	</ItemGroup>
+
+</Project>
