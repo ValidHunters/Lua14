@@ -5,10 +5,10 @@ using System.Reflection;
 
 internal sealed class LuaMod
 {
-    public LuaConfig Config;
-    public List<LuaFile> Entries;
+    public readonly LuaConfig Config;
+    public readonly List<LuaFile> Entries;
 
-    private Lua _state = new();
+    private readonly Lua _state = new();
     private KeraLua.Lua _cstate => _state.State;
 
     public LuaMod(LuaConfig config, List<LuaFile> entries)
@@ -33,14 +33,12 @@ internal sealed class LuaMod
     }
     private object RequireModFunc(string path)
     {
-        LuaTable loaded = _state.GetTable("package.loaded");
-        if (loaded[path] == null)
-        {
-            if (!TryFindFile(path, out var file))
-                throw new Exception($"No file found with path {path}");
+        var loaded = _state.GetTable("package.loaded");
+        if (loaded[path] != null) return loaded[path];
+        if (!TryFindFile(path, out var file))
+            throw new Exception($"No file found with path {path}");
 
-            loaded[path] = _state.LoadString(file?.Content, "require_mod_chunk").Call();
-        }
+        loaded[path] = _state.LoadString(file?.Content, "require_mod_chunk").Call();
 
         return loaded[path];
     }
