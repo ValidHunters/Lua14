@@ -8,31 +8,31 @@
     </PropertyGroup>
 
     <ItemGroup>
-		<PackageReference Include="Lib.Harmony" Version="2.3.1.1" />
-		<PackageReference Include="NLua" Version="1.7.2" />
-	</ItemGroup>
+        <PackageReference Include="Lib.Harmony" Version="2.3.1.1"/>
+        <PackageReference Include="NLua" Version="1.7.2"/>
+    </ItemGroup>
 
-	<ItemGroup>
-		<Reference Include="Content.Client">
-			<HintPath>..\..\space-station-14\bin\Content.Client\Content.Client.dll</HintPath>
-			<Private>False</Private>
-		</Reference>
-		<Reference Include="Content.Shared">
-			<HintPath>..\..\space-station-14\bin\Content.Client\Content.Shared.dll</HintPath>
-			<Private>False</Private>
-		</Reference>
-		<Reference Include="Robust.Client">
-			<HintPath>..\..\space-station-14\bin\Content.Client\Robust.Client.dll</HintPath>
-			<Private>False</Private>
-		</Reference>
-		<Reference Include="Robust.Shared">
-			<HintPath>..\..\space-station-14\bin\Content.Client\Robust.Shared.dll</HintPath>
-			<Private>False</Private>
-		</Reference>
-		<Reference Include="Robust.Shared.Maths">
-			<HintPath>..\..\space-station-14\bin\Content.Client\Robust.Shared.Maths.dll</HintPath>
-			<Private>False</Private>
-		</Reference>
-	</ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\space-station-14\Content.Client\Content.Client.csproj">
+            <Name>Content.Client</Name>
+            <Private>False</Private>
+        </ProjectReference>
+        <ProjectReference Include="..\space-station-14\Content.Shared\Content.Shared.csproj">
+            <Name>Content.Shared</Name>
+            <Private>False</Private>
+        </ProjectReference>
+        <ProjectReference Include="..\space-station-14\RobustToolbox\Robust.Client\Robust.Client.csproj">
+            <Name>Robust.Client</Name>
+            <Private>False</Private>
+        </ProjectReference>
+        <ProjectReference Include="..\space-station-14\RobustToolbox\Robust.Shared\Robust.Shared.csproj">
+            <Name>Robust.Shared</Name>
+            <Private>False</Private>
+        </ProjectReference>
+        <ProjectReference Include="..\space-station-14\RobustToolbox\Robust.Shared.Maths\Robust.Shared.Maths.csproj">
+            <Name>Robust.Client</Name>
+            <Private>False</Private>
+        </ProjectReference>
+    </ItemGroup>
 
 </Project>
