@@ -25,7 +25,7 @@ public class LuaRunner
         var libs = _reflection.GetAllChildren<LuaLibrary>();
         foreach (var lib in libs)
         {
-            var library = (LuaLibrary)Activator.CreateInstance(lib, _state, _logger)!;
+            var library = (LuaLibrary)Activator.CreateInstance(lib, _state, _mod, _logger)!;
             library.Register();
         }
     }
