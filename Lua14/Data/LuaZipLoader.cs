@@ -2,9 +2,9 @@
 using System.Reflection;
 using System.Text.Json;
 
-namespace Lua14.Loader;
+namespace Lua14.Data;
 
-internal static class LuaLoader
+public static class LuaZipLoader
 {
     public static string GetModsFolderPath()
     {

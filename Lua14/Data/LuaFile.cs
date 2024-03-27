@@ -1,6 +1,6 @@
-﻿namespace Lua14.Loader;
+﻿namespace Lua14.Data;
 
-internal sealed class LuaFile
+public sealed class LuaFile
 {
     public LuaFile(string relativePath, string content)
     {

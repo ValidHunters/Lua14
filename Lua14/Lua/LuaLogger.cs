@@ -1,7 +1,7 @@
 using Robust.Shared.IoC;
 using Robust.Shared.Log;
 
-namespace Lua14.LuaTools;
+namespace Lua14.Lua;
 
 public class LuaLogger(string loggerName = "LuaLog")
 {
