@@ -18,6 +18,7 @@ public abstract class LuaLibrary
     public virtual bool IsLibraryGlobal { get { return false; } }
     public abstract string Name { get; }
 
+    public virtual void Initialize() { }
     public void Register() {
         if (!IsLibraryGlobal)
             Lua.NewTable(Name);
@@ -27,9 +28,9 @@ public abstract class LuaLibrary
         {
             var attr = method.GetCustomAttribute<LuaMethodAttribute>()!;
             if (IsLibraryGlobal)
-                Lua.RegisterFunction(Name + "." + attr.Name, this, method);
-            else
                 Lua.RegisterFunction(attr.Name, this, method);
+            else
+                Lua.RegisterFunction(Name + "." + attr.Name, this, method);
         }
     }
 }

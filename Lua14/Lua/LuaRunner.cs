@@ -1,5 +1,6 @@
 ﻿using Lua14.Data;
 using Robust.Shared.IoC;
+using Robust.Shared.Log;
 using Robust.Shared.Reflection;
 
 namespace Lua14.Lua;
@@ -11,21 +12,39 @@ public class LuaRunner
     private readonly LuaMod _mod;
     private readonly LuaLogger _logger;
     private readonly NLua.Lua _state = new();
-    private KeraLua.Lua _kstate => _state.State;
+    private readonly IDependencyCollection _deps;
+
     public LuaRunner(LuaMod mod)
     {
         IoCManager.InjectDependencies(this);
         _mod = mod;
         _logger = new(mod.Config.Name);
 
+        Type depsType = _reflection.GetType("IoC.DependencyCollection")!;
+        _deps = (IDependencyCollection)Activator.CreateInstance(depsType)!;
+
+        RegisterLibs();
         LoadLibs();
     }
 
-    private void LoadLibs() {
+    private void RegisterLibs() {
         var libs = _reflection.GetAllChildren<LuaLibrary>();
         foreach (var lib in libs)
         {
             var library = (LuaLibrary)Activator.CreateInstance(lib, _state, _mod, _logger)!;
+
+            _deps.RegisterInstance(lib, library);
+        }
+        _deps.BuildGraph();
+    }
+
+    private void LoadLibs() {
+        foreach (var type in _deps.GetRegisteredTypes())
+        {
+            var library = (LuaLibrary)_deps.ResolveType(type);
+            _deps.InjectDependencies(library);
+
+            library.Initialize();
             library.Register();
         }
     }
