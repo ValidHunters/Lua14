@@ -1,4 +1,5 @@
-﻿using System.IO.Compression;
+﻿using Robust.Shared.Log;
+using System.IO.Compression;
 using System.Reflection;
 using System.Text.Json;
 
@@ -9,7 +10,8 @@ public static class LuaZipLoader
     public static string GetModsFolderPath()
     {
         var currentAssemblyPath = Assembly.GetExecutingAssembly().Location;
-        var marseyPath = Path.GetDirectoryName(currentAssemblyPath) ?? throw new Exception("Wrong dll location");
+        var marseyModsPath = Path.GetDirectoryName(currentAssemblyPath);
+        var marseyPath = Path.GetDirectoryName(marseyModsPath) ?? throw new Exception("Wrong dll path");
         var luaModsPath = Path.Combine(marseyPath, "LuaMods");
 
         return luaModsPath;
@@ -80,7 +82,7 @@ public static class LuaZipLoader
     }
     private static LuaFile ReadLuaFile(Stream fileStream, string filePath)
     {
-        StreamReader reader = new StreamReader(fileStream);
+        StreamReader reader = new(fileStream);
         string content = reader.ReadToEnd();
 
         return new LuaFile(filePath, content);

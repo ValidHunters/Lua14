@@ -53,6 +53,6 @@ public class LuaRunner
         if (!_mod.TryFindFile(_mod.Config.MainFile, out var file))
             throw new Exception($"No file found with path {_mod.Config.MainFile}");
 
-        return _state.DoString(file.Content);
+        return _state.DoString(file.Content, _mod.Config.Name);
     }
 }
