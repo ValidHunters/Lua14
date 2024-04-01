@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Lua14.Data;
+﻿using Lua14.Data;
 using Lua14.Lua;
 using Robust.Shared.ContentPack;
 using Robust.Shared.IoC;
@@ -24,15 +23,16 @@ public sealed class EntryPoint : GameShared
         var mods = LuaZipLoader.ReadFolder(modFolder);
 
         MarseyLogger.Log(MarseyLogger.LogType.DEBG, "Start executing of all mods...");
-        foreach (var runner in mods.Select(mod => new LuaRunner(mod)))
+        foreach (var mod in mods)
         {
             try
             {
+                LuaRunner runner = new(mod);
                 runner.ExecuteMain();
             }
             catch (Exception e)
             {
-                MarseyLogger.Log(MarseyLogger.LogType.FATL, $"Failed to start mod with name {runner.Mod.Config.Name}");
+                MarseyLogger.Log(MarseyLogger.LogType.FATL, $"Failed to start mod with name {mod.Config.Name}");
                 MarseyLogger.Log(MarseyLogger.LogType.FATL, $"Exception: {e}");
             }
         }

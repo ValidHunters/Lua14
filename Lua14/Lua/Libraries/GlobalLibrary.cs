@@ -2,7 +2,7 @@
 
 namespace Lua14.Lua.Libraries;
 
-public class GlobalLibrary(NLua.Lua lua, LuaMod mod, LuaLogger log) : LuaLibrary(lua, mod, log)
+public sealed class GlobalLibrary(NLua.Lua lua, LuaMod mod, LuaLogger log) : LuaLibrary(lua, mod, log)
 {
     public override string Name => "global";
 

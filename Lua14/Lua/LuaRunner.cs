@@ -1,6 +1,5 @@
 ﻿using Lua14.Data;
 using Robust.Shared.IoC;
-using Robust.Shared.Log;
 using Robust.Shared.Reflection;
 
 namespace Lua14.Lua;
@@ -9,7 +8,7 @@ public class LuaRunner
 {
     [Dependency] private readonly IReflectionManager _reflection = default!;
 
-    public readonly LuaMod Mod;
+    private readonly LuaMod _mod;
     private readonly LuaLogger _logger;
     private readonly NLua.Lua _state = new();
     private readonly IDependencyCollection _deps;
@@ -17,11 +16,11 @@ public class LuaRunner
     public LuaRunner(LuaMod mod)
     {
         IoCManager.InjectDependencies(this);
-        Mod = mod;
+        _mod = mod;
         _logger = new(mod.Config.Name);
 
-        Type depsType = _reflection.GetType("IoC.DependencyCollection")!;
-        _deps = (IDependencyCollection)Activator.CreateInstance(depsType)!;
+        var gameDeps = IoCManager.Resolve<IDependencyCollection>();
+        _deps = gameDeps.FromParent(gameDeps); // new DependencyCollection(gameDeps)
 
         RegisterLibs();
         LoadLibs();
@@ -31,7 +30,7 @@ public class LuaRunner
         var libs = _reflection.GetAllChildren<LuaLibrary>();
         foreach (var lib in libs)
         {
-            var library = (LuaLibrary)Activator.CreateInstance(lib, _state, Mod, _logger)!;
+            var library = (LuaLibrary)Activator.CreateInstance(lib, _state, _mod, _logger)!;
 
             _deps.RegisterInstance(lib, library);
         }
@@ -50,9 +49,9 @@ public class LuaRunner
     }
 
     public object[] ExecuteMain() {
-        if (!Mod.TryFindFile(Mod.Config.MainFile, out var file))
-            throw new Exception($"No file found with path {Mod.Config.MainFile}");
+        if (!_mod.TryFindFile(_mod.Config.MainFile, out var file))
+            throw new Exception($"No file found with path {_mod.Config.MainFile}");
 
-        return _state.DoString(file.Content, Mod.Config.Name);
+        return _state.DoString(file.Content, _mod.Config.Name);
     }
 }

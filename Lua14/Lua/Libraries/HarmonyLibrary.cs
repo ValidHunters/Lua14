@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace Lua14.Lua.Libraries;
 
-public class HarmonyLibrary(NLua.Lua lua, LuaMod mod, LuaLogger log) : LuaLibrary(lua, mod, log)
+public sealed class HarmonyLibrary(NLua.Lua lua, LuaMod mod, LuaLogger log) : LuaLibrary(lua, mod, log)
 {
     [Dependency] private readonly ExtensionLibrary _extensions = default!;
 
