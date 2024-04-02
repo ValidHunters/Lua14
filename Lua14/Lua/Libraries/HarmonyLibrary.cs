@@ -1,15 +1,12 @@
 ﻿using Lua14.Data;
 using HarmonyLib;
 using NLua;
-using Robust.Shared.IoC;
 using System.Reflection;
 
 namespace Lua14.Lua.Libraries;
 
 public sealed class HarmonyLibrary(NLua.Lua lua, LuaMod mod, LuaLogger log) : LuaLibrary(lua, mod, log)
 {
-    [Dependency] private readonly ExtensionLibrary _extensions = default!;
-
     public override string Name => "harmony";
 
     [LuaMethod("patch")]
@@ -20,61 +17,126 @@ public sealed class HarmonyLibrary(NLua.Lua lua, LuaMod mod, LuaLogger log) : Lu
         LuaFunction? transpiler = null,
         LuaFunction? finalizer = null)
     {
-        var processor = SubverterPatch.Harm.CreateProcessor(original);
-        if (prefix != null)
+        try
         {
-            Delegate prefixDelegate = (object __instance, object[] __args) =>
+            var processor = SubverterPatch.Harm.CreateProcessor(original);
+            if (prefix != null)
             {
-                var prefixTable = _extensions.NewTable();
-                prefixTable["instance"] = __instance;
-                prefixTable["args"] = __args;
+                HarmonyLuaPool.Add(
+                    new LuaPoolData(
+                        original,
+                        prefix,
+                        HarmonyPatchType.Prefix
+                    )
+                );
+                HarmonyMethod method = new(GetType(), "LuaPrefixProxy");
+                processor.AddPrefix(method);
+            }
+            if (postfix != null)
+            {
+                HarmonyLuaPool.Add(
+                    new LuaPoolData(
+                        original,
+                        postfix,
+                        HarmonyPatchType.Postfix
+                    )
+                );
+                HarmonyMethod method = new(GetType(), "LuaPostfixProxy");
+                processor.AddPostfix(method);
+            }
+            if (transpiler != null)
+            {
+                HarmonyLuaPool.Add(
+                    new LuaPoolData(
+                        original,
+                        transpiler,
+                        HarmonyPatchType.Postfix
+                    )
+                );
+                HarmonyMethod method = new(GetType(), "LuaTranspilerProxy");
+                processor.AddTranspiler(method);
+            }
+            if (finalizer != null)
+            {
+                HarmonyLuaPool.Add(
+                    new LuaPoolData(
+                        original,
+                        finalizer,
+                        HarmonyPatchType.Finalizer
+                    )
+                );
+                HarmonyMethod method = new(GetType(), "LuaFinalizerProxy");
+                processor.AddFinalizer(method);
+            }
 
-                object[] data = prefix.Call(prefixTable);
-                if (data.Length > 0 && data[0] == (object)false)
-                    return false;
-
-                return true;
-            };
-            HarmonyMethod prefixMethod = new(prefixDelegate);
-            processor.AddPrefix(prefixMethod);
-        }
-        if (postfix != null)
+            processor.Patch();
+        } catch(Exception e)
         {
-            Delegate postfixDelegate = (object __instance, object[] __args, ref object __result) =>
-            {
-                var postfixTable = _extensions.NewTable();
-                postfixTable["instance"] = __instance;
-                postfixTable["args"] = __args;
-                postfixTable["result"] = __result;
-
-                postfix.Call(postfixTable);
-            };
-            HarmonyMethod postfixMethod = new(postfixDelegate);
-            processor.AddPostfix(postfixMethod);
+            Logger.Info(e.ToString());
         }
-        if (transpiler != null)
+    }
+
+    bool LuaPrefixProxy(object __instance, object[] __args, MethodBase __originalMethod)
+    {
+        LuaPoolData data = HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Prefix);
+        LuaFunction prefix = data.Function;
+
+        var luaData = prefix.Call(__instance, __args);
+        if (luaData.Length > 0 && luaData[0] as bool? == false)
+            return false;
+
+        return true;
+    }
+    void LuaPostfixProxy(object __instance, object[] __args, ref object __result, MethodBase __originalMethod)
+    {
+        LuaPoolData data = HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Postfix);
+        LuaFunction postfix = data.Function;
+
+        postfix.Call(__instance, __args, __result);
+    }
+    IEnumerable<CodeInstruction> LuaTranspilerProxy(IEnumerable<CodeInstruction> instructions, MethodBase __originalMethod)
+    {
+        LuaPoolData data = HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Transpiler);
+        LuaFunction transpiler = data.Function;
+
+        var luaData = transpiler.Call(instructions);
+        if (luaData.Length < 1 || luaData[0] is not LuaTable instructionsTable)
         {
-            Delegate transpilerDelegate = (IEnumerable<CodeInstruction> instructions) =>
-            {
-                object[] data = transpiler.Call(instructions);
-                if (data.Length > 0 && data[0] != null)
-                    return data[0];
-
-                return instructions;
-            };
-            HarmonyMethod transpilerMethod = new(transpilerDelegate);
-            processor.AddTranspiler(transpilerMethod);
+            Logger.Error("Lua transpiler function didnt return a table.");
+            return instructions;
         }
-        if (finalizer != null)
+
+        return TableToEnumerable<CodeInstruction>(instructionsTable) ?? instructions;
+    }
+    void LuaFinalizerProxy(Exception __exception, MethodBase __originalMethod)
+    {
+        LuaPoolData data = HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Finalizer);
+        LuaFunction finalizer = data.Function;
+
+        finalizer.Call(__exception);
+    }
+
+    private struct LuaPoolData(MethodBase cFunction, LuaFunction func, HarmonyPatchType type)
+    {
+        public LuaFunction Function { get; } = func;
+        public MethodBase CFunction { get; } = cFunction;
+        public HarmonyPatchType Type { get; } = type;
+    }
+    static private class HarmonyLuaPool
+    {
+        private static readonly HashSet<LuaPoolData> _poolData = [];
+
+        public static LuaPoolData Get(MethodBase method, HarmonyPatchType type)
         {
-            Delegate finalizerDelegate = (Exception __exception) =>
-            {
-                finalizer.Call(__exception);
-            };
-            HarmonyMethod finalizerMethod = new(finalizerDelegate);
-            processor.AddFinalizer(finalizerMethod);
+            return _poolData.Where(it => it.Type == type && it.CFunction == method).Single();
         }
-
-        processor.Patch();
+        public static void Add(LuaPoolData data)
+        {
+            _poolData.Add(data);
+        }
+        public static void Remove(LuaPoolData data)
+        {
+            _poolData.Remove(data);
+        }
     }
 }

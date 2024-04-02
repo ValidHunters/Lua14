@@ -40,6 +40,9 @@ public class LuaRunner
     private void LoadLibs() {
         foreach (var type in _deps.GetRegisteredTypes())
         {
+            if (!typeof(LuaLibrary).IsAssignableFrom(type))
+                continue;
+
             var library = (LuaLibrary)_deps.ResolveType(type);
             _deps.InjectDependencies(library);
 

@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace Lua14.Lua;
 
-public abstract class LuaLibrary
+public abstract partial class LuaLibrary
 {
     protected LuaLibrary(NLua.Lua lua, LuaMod mod, LuaLogger log)
     {
@@ -18,7 +18,9 @@ public abstract class LuaLibrary
     public virtual bool IsLibraryGlobal { get { return false; } }
     public abstract string Name { get; }
 
-    public virtual void Initialize() { }
+    public virtual void Initialize() { 
+        InitializeExtensions();
+    }
     public void Register() {
         if (!IsLibraryGlobal)
             Lua.NewTable(Name);

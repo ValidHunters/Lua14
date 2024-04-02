@@ -9,7 +9,6 @@ namespace Lua14.Lua.Libraries;
 public sealed class ReflectionLibrary(NLua.Lua lua, LuaMod mod, LuaLogger log) : LuaLibrary(lua, mod, log)
 {
     [Dependency] private readonly IReflectionManager _reflection = default!;
-    [Dependency] private readonly ExtensionLibrary _extensions = default!;
 
     private static readonly BindingFlags _allFlags = BindingFlags.Public
             | BindingFlags.NonPublic
@@ -43,20 +42,20 @@ public sealed class ReflectionLibrary(NLua.Lua lua, LuaMod mod, LuaLogger log) :
     {
         IEnumerable<Type> types = _reflection.FindAllTypes();
 
-        return _extensions.EnumerableToTable(types);
+        return EnumerableToTable(types);
     }
     [LuaMethod("findTypesWithAttribute")]
     public LuaTable FindTypesWithAttribute(Type attribute)
     {
         IEnumerable<Type> types = _reflection.FindTypesWithAttribute(attribute);
 
-        return _extensions.EnumerableToTable(types);
+        return EnumerableToTable(types);
     }
     [LuaMethod("getAllChildren")]
     public LuaTable GetAllChildren(Type baseType, bool inclusive = false)
     {
         IEnumerable<Type> types = _reflection.GetAllChildren(baseType, inclusive);
 
-        return _extensions.EnumerableToTable(types);
+        return EnumerableToTable(types);
     }
 }
