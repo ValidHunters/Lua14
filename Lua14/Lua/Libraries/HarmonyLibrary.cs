@@ -108,7 +108,7 @@ public sealed class HarmonyLibrary(NLua.Lua lua, LuaMod mod, LuaLogger log) : Lu
 
         return TableToEnumerable<CodeInstruction>(instructionsTable) ?? instructions;
     }
-    void LuaFinalizerProxy(Exception __exception, MethodBase __originalMethod)
+    static void LuaFinalizerProxy(Exception __exception, MethodBase __originalMethod)
     {
         LuaPoolData data = HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Finalizer);
         LuaFunction finalizer = data.Function;
