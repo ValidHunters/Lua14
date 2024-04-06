@@ -2,27 +2,20 @@
 
 namespace Lua14.Lua;
 
-public partial class LuaLibrary
+public static class LuaExtensions
 {
     private static readonly string _tempPath = "_LUA14_TEMP";
-    private LuaFunction _getmetatable = default!;
-    private LuaFunction _setmetatable = default!;
 
-    private void InitializeExtensions()
-    {
-        _getmetatable = Lua.GetFunction("getmetatable");
-        _setmetatable = Lua.GetFunction("setmetatable");
-    }
-    protected LuaTable NewTable()
+    public static LuaTable NewTable(this NLua.Lua Lua)
     {
         Lua.NewTable(_tempPath);
         LuaTable table = Lua.GetTable(_tempPath);
         Lua[_tempPath] = null;
         return table;
     }
-    protected LuaTable EnumerableToTable<T>(IEnumerable<T> enumerable)
+    public static LuaTable EnumerableToTable<T>(this NLua.Lua Lua, IEnumerable<T> enumerable)
     {
-        LuaTable table = NewTable();
+        LuaTable table = Lua.NewTable();
         List<T> enumerableList = enumerable.ToList();
 
         for (int i = 0; i < enumerableList.Count; i++)
@@ -32,7 +25,7 @@ public partial class LuaLibrary
 
         return table;
     }
-    protected Dictionary<T1, T2>? TableToDictionary<T1, T2>(LuaTable table) where T1: notnull
+    public static Dictionary<T1, T2>? TableToDictionary<T1, T2>(this NLua.Lua Lua, LuaTable table) where T1 : notnull
     {
         Dictionary<object, object> dictionary = Lua.GetTableDict(table);
         Dictionary<T1, T2> result = [];
@@ -47,9 +40,9 @@ public partial class LuaLibrary
 
         return result;
     }
-    protected IEnumerable<T>? TableToEnumerable<T>(LuaTable table)
+    public static IEnumerable<T>? TableToEnumerable<T>(this NLua.Lua Lua, LuaTable table)
     {
-        var dictionary = TableToDictionary<int, T>(table);
+        var dictionary = Lua.TableToDictionary<int, T>(table);
         if (dictionary == null)
             return null;
 
@@ -61,12 +54,19 @@ public partial class LuaLibrary
 
         return result;
     }
-    protected LuaTable GetMetatable(LuaTable table)
+    public static LuaTable? GetMetatable(this NLua.Lua Lua, LuaTable table)
     {
-        return (LuaTable)_getmetatable.Call(table)[0];
+        LuaFunction getmetatable = Lua.GetFunction("getmetatable");
+        object[] metatable = getmetatable.Call(table);
+
+        if (metatable.Length < 1)
+            return null;
+
+        return metatable[0] as LuaTable;
     }
-    protected void SetMetatable(LuaTable table, LuaTable metatable)
+    public static void SetMetatable(this NLua.Lua Lua, LuaTable table, LuaTable metatable)
     {
-        _setmetatable.Call(table, metatable);
+        LuaFunction setmetatable = Lua.GetFunction("setmetatable");
+        setmetatable.Call(table, metatable);
     }
 }

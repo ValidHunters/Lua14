@@ -7,11 +7,14 @@ namespace Lua14.Lua;
 public class LuaRunner
 {
     [Dependency] private readonly IReflectionManager _reflection = default!;
+    [Dependency] private readonly IDependencyCollection _gameDeps = default!;
+
+    private readonly IDependencyCollection _deps;
+    private readonly List<Type> _librariesTypes = [];
 
     private readonly LuaMod _mod;
     private readonly LuaLogger _logger;
     private readonly NLua.Lua _state = new();
-    private readonly IDependencyCollection _deps;
 
     public LuaRunner(LuaMod mod)
     {
@@ -19,35 +22,41 @@ public class LuaRunner
         _mod = mod;
         _logger = new(mod.Config.Name);
 
-        var gameDeps = IoCManager.Resolve<IDependencyCollection>();
-        _deps = gameDeps.FromParent(gameDeps); // new DependencyCollection(gameDeps)
+        _deps = _gameDeps.FromParent(_gameDeps); // new DependencyCollection(_gameDeps)
 
+        RegisterIoC();
         RegisterLibs();
         LoadLibs();
     }
 
+    private void RegisterIoC()
+    {
+        _deps.RegisterInstance<NLua.Lua>(_state);
+        _deps.RegisterInstance<LuaMod>(_mod);
+        _deps.RegisterInstance<LuaLogger>(_logger);
+        _deps.RegisterInstance<HarmonyLib.Harmony>(
+            new HarmonyLib.Harmony(_mod.Config.Name)
+        );
+    }
+
     private void RegisterLibs() {
         var libs = _reflection.GetAllChildren<LuaLibrary>();
+        _librariesTypes.AddRange(libs);
+
         foreach (var lib in libs)
         {
-            var library = (LuaLibrary)Activator.CreateInstance(lib, _state, _mod, _logger)!;
-
-            _deps.RegisterInstance(lib, library);
+            _deps.Register(lib);
         }
         _deps.BuildGraph();
     }
 
     private void LoadLibs() {
-        foreach (var type in _deps.GetRegisteredTypes())
+        foreach (var type in _librariesTypes)
         {
-            if (!typeof(LuaLibrary).IsAssignableFrom(type))
-                continue;
-
             var library = (LuaLibrary)_deps.ResolveType(type);
-            _deps.InjectDependencies(library);
 
             library.Initialize();
-            library.Register();
+            library.Register(_state);
         }
     }
 

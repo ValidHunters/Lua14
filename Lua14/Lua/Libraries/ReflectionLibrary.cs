@@ -1,14 +1,14 @@
-﻿using Lua14.Data;
-using NLua;
+﻿using NLua;
 using Robust.Shared.IoC;
 using Robust.Shared.Reflection;
 using System.Reflection;
 
 namespace Lua14.Lua.Libraries;
 
-public sealed class ReflectionLibrary(NLua.Lua lua, LuaMod mod, LuaLogger log) : LuaLibrary(lua, mod, log)
+public sealed class ReflectionLibrary : LuaLibrary
 {
     [Dependency] private readonly IReflectionManager _reflection = default!;
+    [Dependency] private readonly NLua.Lua _lua = default!;
 
     private static readonly BindingFlags _allFlags = BindingFlags.Public
             | BindingFlags.NonPublic
@@ -42,20 +42,20 @@ public sealed class ReflectionLibrary(NLua.Lua lua, LuaMod mod, LuaLogger log) :
     {
         IEnumerable<Type> types = _reflection.FindAllTypes();
 
-        return EnumerableToTable(types);
+        return _lua.EnumerableToTable(types);
     }
     [LuaMethod("findTypesWithAttribute")]
     public LuaTable FindTypesWithAttribute(Type attribute)
     {
         IEnumerable<Type> types = _reflection.FindTypesWithAttribute(attribute);
 
-        return EnumerableToTable(types);
+        return _lua.EnumerableToTable(types);
     }
     [LuaMethod("getAllChildren")]
     public LuaTable GetAllChildren(Type baseType, bool inclusive = false)
     {
         IEnumerable<Type> types = _reflection.GetAllChildren(baseType, inclusive);
 
-        return EnumerableToTable(types);
+        return _lua.EnumerableToTable(types);
     }
 }

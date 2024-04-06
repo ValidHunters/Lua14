@@ -12,27 +12,19 @@
         <PackageReference Include="NLua" Version="1.7.2" />
     </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\space-station-14\Content.Client\Content.Client.csproj">
-            <Name>Content.Client</Name>
-            <Private>False</Private>
-        </ProjectReference>
-        <ProjectReference Include="..\space-station-14\Content.Shared\Content.Shared.csproj">
-            <Name>Content.Shared</Name>
-            <Private>False</Private>
-        </ProjectReference>
-        <ProjectReference Include="..\space-station-14\RobustToolbox\Robust.Client\Robust.Client.csproj">
-            <Name>Robust.Client</Name>
-            <Private>False</Private>
-        </ProjectReference>
-        <ProjectReference Include="..\space-station-14\RobustToolbox\Robust.Shared\Robust.Shared.csproj">
-            <Name>Robust.Shared</Name>
-            <Private>False</Private>
-        </ProjectReference>
-        <ProjectReference Include="..\space-station-14\RobustToolbox\Robust.Shared.Maths\Robust.Shared.Maths.csproj">
-            <Name>Robust.Client</Name>
-            <Private>False</Private>
-        </ProjectReference>
+    <ItemGroup> 
+        <ProjectReference Include="..\space-station-14\Content.Client\Content.Client.csproj" Private="false" PrivateAssets="all" />
+        <ProjectReference Include="..\space-station-14\Content.Shared\Content.Shared.csproj" Private="false" PrivateAssets="all" />
+        <ProjectReference Include="..\space-station-14\RobustToolbox\Robust.Shared\Robust.Shared.csproj" Private="false" PrivateAssets="all" />
+        <ProjectReference Include="..\space-station-14\RobustToolbox\Robust.Client\Robust.Client.csproj" Private="false" PrivateAssets="all" />
+        <ProjectReference Include="..\space-station-14\RobustToolbox\Robust.Shared.Maths\Robust.Shared.Maths.csproj" Private="false" PrivateAssets="all" />
+        <ProjectReference Include="..\space-station-14\RobustToolbox\Robust.Shared.Scripting\Robust.Shared.Scripting.csproj" Private="false" PrivateAssets="all" />
+        <ProjectReference Include="..\space-station-14\Content.Shared.Database\Content.Shared.Database.csproj" Private="false" PrivateAssets="all" />
+        <ProjectReference Include="..\space-station-14\RobustToolbox\NetSerializer\NetSerializer\NetSerializer.csproj" Private="false" PrivateAssets="all" />
+        <ProjectReference Include="..\space-station-14\RobustToolbox\Lidgren.Network\Lidgren.Network.csproj" Private="false" PrivateAssets="all" />
+        <ProjectReference Include="..\space-station-14\RobustToolbox\Avalonia.Base\Avalonia.Base.csproj" Private="false" PrivateAssets="all" />
+        <ProjectReference Include="..\space-station-14\RobustToolbox\Robust.LoaderApi\Robust.LoaderApi\Robust.LoaderApi.csproj" Private="false" PrivateAssets="all" />
+        <ProjectReference Include="..\space-station-14\RobustToolbox\OpenToolkit.GraphicsLibraryFramework\OpenToolkit.GraphicsLibraryFramework.csproj" Private="false" PrivateAssets="all" />
     </ItemGroup>
 
 </Project>
