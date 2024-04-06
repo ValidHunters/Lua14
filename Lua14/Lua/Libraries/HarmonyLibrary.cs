@@ -76,7 +76,7 @@ public sealed class HarmonyLibrary(NLua.Lua lua, LuaMod mod, LuaLogger log) : Lu
         }
     }
 
-    bool LuaPrefixProxy(object __instance, object[] __args, MethodBase __originalMethod)
+    static bool LuaPrefixProxy(object __instance, object[] __args, MethodBase __originalMethod)
     {
         LuaPoolData data = HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Prefix);
         LuaFunction prefix = data.Function;
@@ -87,7 +87,7 @@ public sealed class HarmonyLibrary(NLua.Lua lua, LuaMod mod, LuaLogger log) : Lu
 
         return true;
     }
-    void LuaPostfixProxy(object __instance, object[] __args, ref object __result, MethodBase __originalMethod)
+    static void LuaPostfixProxy(object __instance, object[] __args, ref object __result, MethodBase __originalMethod)
     {
         LuaPoolData data = HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Postfix);
         LuaFunction postfix = data.Function;
@@ -108,7 +108,7 @@ public sealed class HarmonyLibrary(NLua.Lua lua, LuaMod mod, LuaLogger log) : Lu
 
         return TableToEnumerable<CodeInstruction>(instructionsTable) ?? instructions;
     }
-    void LuaFinalizerProxy(Exception __exception, MethodBase __originalMethod)
+    static void LuaFinalizerProxy(Exception __exception, MethodBase __originalMethod)
     {
         LuaPoolData data = HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Finalizer);
         LuaFunction finalizer = data.Function;
