@@ -89,9 +89,9 @@ public sealed class HarmonyLibrary : LuaLibrary
 
     static bool LuaPrefixProxy(object __instance, object[] __args, MethodBase __originalMethod)
     {
-        var (prefix, _) = HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Prefix);
+        var (prefix, lua) = HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Prefix);
 
-        var luaData = prefix.Call(__instance, __args);
+        var luaData = prefix.Call(__instance, lua.EnumerableToTable(__args));
         if (luaData.Length > 0 && luaData[0] as bool? == false)
             return false;
 
@@ -99,9 +99,9 @@ public sealed class HarmonyLibrary : LuaLibrary
     }
     static void LuaPostfixProxy(object __instance, object[] __args, ref object __result, MethodBase __originalMethod)
     {
-        var (postfix, _) = HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Postfix);
+        var (postfix, lua) = HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Postfix);
 
-        postfix.Call(__instance, __args, __result);
+        postfix.Call(__instance, lua.EnumerableToTable(__args), __result);
     }
     static IEnumerable<CodeInstruction> LuaTranspilerProxy(IEnumerable<CodeInstruction> instructions, MethodBase __originalMethod)
     {
