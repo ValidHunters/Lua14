@@ -4,30 +4,30 @@ namespace Lua14.Lua;
 
 public static class LuaExtensions
 {
-    private static readonly string _tempPath = "_LUA14_TEMP";
+    private const string TempPath = "_LUA14_TEMP";
 
-    public static LuaTable NewTable(this NLua.Lua Lua)
+    public static LuaTable NewTable(this NLua.Lua lua)
     {
-        Lua.NewTable(_tempPath);
-        LuaTable table = Lua.GetTable(_tempPath);
-        Lua[_tempPath] = null;
+        lua.NewTable(TempPath);
+        var table = lua.GetTable(TempPath);
+        lua[TempPath] = null;
         return table;
     }
-    public static LuaTable EnumerableToTable<T>(this NLua.Lua Lua, IEnumerable<T> enumerable)
+    public static LuaTable EnumerableToTable<T>(this NLua.Lua lua, IEnumerable<T> enumerable)
     {
-        LuaTable table = Lua.NewTable();
-        List<T> enumerableList = enumerable.ToList();
+        var table = lua.NewTable();
+        var enumerableList = enumerable.ToList();
 
-        for (int i = 0; i < enumerableList.Count; i++)
+        for (var i = 0; i < enumerableList.Count; i++)
         {
             table[i + 1] = enumerableList[i];
         }
 
         return table;
     }
-    public static Dictionary<T1, T2>? TableToDictionary<T1, T2>(this NLua.Lua Lua, LuaTable table) where T1 : notnull
+    public static Dictionary<T1, T2>? TableToDictionary<T1, T2>(this NLua.Lua lua, LuaTable table) where T1 : notnull
     {
-        Dictionary<object, object> dictionary = Lua.GetTableDict(table);
+        Dictionary<object, object> dictionary = lua.GetTableDict(table);
         Dictionary<T1, T2> result = [];
         foreach (var pair in dictionary)
         {
@@ -40,9 +40,9 @@ public static class LuaExtensions
 
         return result;
     }
-    public static IEnumerable<T>? TableToEnumerable<T>(this NLua.Lua Lua, LuaTable table)
+    public static IEnumerable<T>? TableToEnumerable<T>(this NLua.Lua lua, LuaTable table)
     {
-        var dictionary = Lua.TableToDictionary<int, T>(table);
+        var dictionary = lua.TableToDictionary<int, T>(table);
         if (dictionary == null)
             return null;
 
@@ -54,19 +54,19 @@ public static class LuaExtensions
 
         return result;
     }
-    public static LuaTable? GetMetatable(this NLua.Lua Lua, LuaTable table)
+    public static LuaTable? GetMetatable(this NLua.Lua lua, LuaTable table)
     {
-        LuaFunction getmetatable = Lua.GetFunction("getmetatable");
-        object[] metatable = getmetatable.Call(table);
+        var getMetaTable = lua.GetFunction("getmetatable");
+        object[] metatable = getMetaTable.Call(table);
 
         if (metatable.Length < 1)
             return null;
 
         return metatable[0] as LuaTable;
     }
-    public static void SetMetatable(this NLua.Lua Lua, LuaTable table, LuaTable metatable)
+    public static void SetMetatable(this NLua.Lua lua, LuaTable table, LuaTable metatable)
     {
-        LuaFunction setmetatable = Lua.GetFunction("setmetatable");
-        setmetatable.Call(table, metatable);
+        var setMetaTable = lua.GetFunction("setmetatable");
+        setMetaTable.Call(table, metatable);
     }
 }
