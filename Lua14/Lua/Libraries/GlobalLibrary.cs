@@ -1,4 +1,5 @@
 ﻿using Lua14.Data;
+using NLua;
 using Robust.Shared.IoC;
 
 namespace Lua14.Lua.Libraries;
@@ -12,6 +13,13 @@ public sealed class GlobalLibrary : LuaLibrary
     public override string Name => "global";
     public override bool IsLibraryGlobal => true;
 
+    private LuaTable _packageLoaded = default!;
+
+    public override void Initialize()
+    {
+        _packageLoaded = _lua.GetTable("package.loaded");
+    }
+
     [LuaMethod("print")]
     public void Print(params string[] values)
     {
@@ -21,13 +29,12 @@ public sealed class GlobalLibrary : LuaLibrary
     [LuaMethod("require")]
     public dynamic Require(string path)
     {
-        var loaded = _lua.GetTable("package.loaded");
-        if (loaded[path] != null) return loaded[path];
+        if (_packageLoaded[path] != null) return _packageLoaded[path];
         if (!_mod.TryFindFile(path, out var file))
             throw new Exception($"No file found with path {path}");
 
-        loaded[path] = _lua.LoadString(file?.Content, "require_mod_chunk").Call();
+        _packageLoaded[path] = _lua.LoadString(file?.Content, "require_mod_chunk").Call();
 
-        return loaded[path];
+        return _packageLoaded[path];
     }
 }

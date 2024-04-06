@@ -27,6 +27,18 @@ public class LuaRunner
         RegisterIoC();
         RegisterLibs();
         LoadLibs();
+        SetupSandbox();
+    }
+
+    private void SetupSandbox()
+    {
+        _state["io"] = null;
+        _state["os"] = null;
+        _state["debug"] = null;
+        _state["luanet"] = null;
+        _state["package"] = null;
+        _state["dofile"] = null;
+        _state["load"] = null;
     }
 
     private void RegisterIoC()
