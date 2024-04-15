@@ -1,53 +1,50 @@
-using HarmonyLib;
 using Lua14.Systems;
 using NLua;
-using Robust.Shared.GameObjects;
+using Robust.Client;
 using Robust.Shared.IoC;
-using Robust.Shared.Log;
 
 namespace Lua14.Lua.Libraries;
 
 public class LuaSystemLibrary : LuaLibrary
 {
-    [Dependency] private readonly HarmonyLib.Harmony _harmony = default!;
-    [Dependency] private readonly EntityManager _entityManager = default!;
-    private LuaSystem _luaSystem = null!;
+    [Dependency] private readonly LuaSystem _luaSystem = default!;
     [Dependency] private readonly NLua.Lua _lua = default!;
-    [Dependency] private readonly LuaLogger _logger = default!;
-    private static List<LuaFunction> _starters = [];
+    [Dependency] private readonly BaseClient _baseClient = default!;
+
+    private readonly List<LuaFunction> _starters = [];
 
     public override void Initialize()
     {
-        _harmony.Patch(AccessTools.Method(AccessTools.TypeByName("Robust.Client.BaseClient"), "OnPlayerJoinedServer"),
-            postfix: new HarmonyMethod(Postfix));
+        _baseClient.PlayerJoinedServer += RunInit;
     }
 
-    public override string Name => "lua-sys";
-    
-    [LuaMethod("starter")]
+
+    public override string Name => "lua_sys";
+
+    private void RunInit(object? sender, PlayerEventArgs e)
+    {
+        foreach (var starter in _starters)
+        {
+            starter.Call();
+        }
+    }
+
+    [LuaMethod("addStarter")]
     public void AddStarter(LuaFunction starterFunc)
     {
         _starters.Add(starterFunc);
     }
 
     [LuaMethod("addSystem")]
-    public bool AddSystem(string name, LuaFunction updateFunc)
+    public bool AddSystem(string name, LuaFunction? initFunc = null, LuaFunction? updateFunc = null)
     {
         var table = _lua.NewTable();
-        return _luaSystem.TryPutLuaSystem(name, updateFunc, table);
+        return _luaSystem.TryPutLuaSystem(name, initFunc, updateFunc, table);
     }
 
     [LuaMethod("removeSystem")]
     public bool RemoveSystem(string name)
     {
         return _luaSystem.TryRemoveLuaSystem(name);
-    }
-
-    static void Postfix()
-    {
-        foreach (var starter in _starters)
-        {
-            starter.Call();
-        }
     }
 }
