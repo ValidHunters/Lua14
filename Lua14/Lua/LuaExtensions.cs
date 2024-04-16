@@ -13,18 +13,20 @@ public static class LuaExtensions
         lua[TempPath] = null;
         return table;
     }
+
     public static LuaTable EnumerableToTable<T>(this NLua.Lua lua, IEnumerable<T> enumerable)
     {
         var table = lua.NewTable();
-        var enumerableList = enumerable.ToList();
+        int index = 0;
 
-        for (var i = 0; i < enumerableList.Count; i++)
+        foreach (var item in enumerable)
         {
-            table[i + 1] = enumerableList[i];
+            table[index++] = item;
         }
 
         return table;
     }
+
     public static Dictionary<T1, T2>? TableToDictionary<T1, T2>(this NLua.Lua lua, LuaTable table) where T1 : notnull
     {
         Dictionary<object, object> dictionary = lua.GetTableDict(table);
@@ -40,6 +42,7 @@ public static class LuaExtensions
 
         return result;
     }
+
     public static IEnumerable<T>? TableToEnumerable<T>(this NLua.Lua lua, LuaTable table)
     {
         var dictionary = lua.TableToDictionary<int, T>(table);
@@ -54,19 +57,14 @@ public static class LuaExtensions
 
         return result;
     }
+
     public static LuaTable? GetMetatable(this NLua.Lua lua, LuaTable table)
     {
-        var getMetaTable = lua.GetFunction("getmetatable");
-        object[] metatable = getMetaTable.Call(table);
-
-        if (metatable.Length < 1)
-            return null;
-
-        return metatable[0] as LuaTable;
+        return lua.GetFunction("getmetatable").Call(table).FirstOrDefault() as LuaTable;
     }
+
     public static void SetMetatable(this NLua.Lua lua, LuaTable table, LuaTable metatable)
     {
-        var setMetaTable = lua.GetFunction("setmetatable");
-        setMetaTable.Call(table, metatable);
+        lua.GetFunction("setmetatable").Call(table, metatable);
     }
 }
