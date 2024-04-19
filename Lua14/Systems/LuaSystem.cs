@@ -5,34 +5,47 @@ namespace Lua14.Systems;
 
 public class LuaSystem : EntitySystem
 {
-    private readonly Dictionary<string, Tuple<LuaFunction?, LuaFunction?, LuaTable>> _functions = new();
+    private readonly HashSet<LuaSystemTable> _systems = [];
 
-    public override void Initialize()
+    public override void Shutdown()
     {
-        base.Initialize();
-        foreach (var (function, _, table) in _functions.Values)
+        base.Shutdown();
+        foreach (var table in _systems)
         {
-            function?.Call(table);
+            table.Shutdown?.Call();
         }
-    }
 
+        _systems.Clear();
+    }
 
     public override void Update(float frameTime)
     {
         base.Update(frameTime);
-        foreach (var (_, function, table) in _functions.Values)
+        foreach (var table in _systems)
         {
-            function?.Call(frameTime, table);
+            table.Update?.Call(frameTime);
         }
     }
 
-    public bool TryPutLuaSystem(string name, LuaFunction? funcInit, LuaFunction? funcUpdate, LuaTable table)
+    public void PutLuaSystem(LuaSystemTable systemTable)
     {
-        return _functions.TryAdd(name, new Tuple<LuaFunction?, LuaFunction?, LuaTable>(funcInit, funcUpdate, table));
+        if (_systems.Where(it => it.Id == systemTable.Id).Any())
+            throw new Exception("There is already a system with this id registred.");
+
+        systemTable.Initialize?.Call();
+        _systems.Add(systemTable);
     }
 
-    public bool TryRemoveLuaSystem(string name)
+    public void RemoveLuaSystem(string id)
     {
-        return _functions.Remove(name);
+        _systems.RemoveWhere(it => it.Id == id);
     }
+}
+
+public struct LuaSystemTable
+{
+    public string Id;
+    public LuaFunction? Initialize;
+    public LuaFunction? Update;
+    public LuaFunction? Shutdown;
 }
