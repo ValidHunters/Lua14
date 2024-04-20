@@ -37,23 +37,30 @@ public class LuaSystemLibrary : LuaLibrary
         luaSystem.PutLuaSystem(table);
     }
 
-    private static LuaSystemTable ToSystemTable(LuaTable table)
-    {
-        if (table["Id"] is not string id)
-            throw new Exception("Field \"Id\" should be a string in your system table.");
-        if (table["Initialize"] != null && table["Initialize"] is not LuaFunction)
-            throw new Exception("Field \"Initialize\" should be a function in your system table.");
-        if (table["Update"] != null && table["Update"] is not LuaFunction)
-            throw new Exception("Field \"Update\" should be a function in your system table.");
-        if (table["Shutdown"] != null && table["Shutdown"] is not LuaFunction)
-            throw new Exception("Field \"Shutdown\" should be a function in your system table.");
+	private static LuaSystemTable ToSystemTable(LuaTable table)
+	{
+	    string id = table["Id"] as string;
+	    if (id == null)
+        	throw new Exception("Field "Id" should be a string in your system table.");
 
-        return new LuaSystemTable
-        {
-            Id = id,
-            Initialize = table["Initialize"] as LuaFunction,
-            Update = table["Update"] as LuaFunction,
-            Shutdown = table["Shutdown"] as LuaFunction
-        };
-    }
+	    LuaFunction initialize = GetLuaFunction(table, "Initialize");
+	    LuaFunction update = GetLuaFunction(table, "Update");
+    	LuaFunction shutdown = GetLuaFunction(table, "Shutdown");
+
+    	return new LuaSystemTable
+    	{
+        	Id = id,
+        	Initialize = initialize,
+        	Update = update,
+        	Shutdown = shutdown
+    	};
+	}
+
+	private static LuaFunction GetLuaFunction(LuaTable table, string key)
+	{
+    	if (table[key] != null && table[key] is not LuaFunction)
+        	throw new Exception($"Field "{key}" should be a function in your system table.");
+
+	    return table[key] as LuaFunction;
+	}
 }
