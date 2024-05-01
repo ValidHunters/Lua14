@@ -34,46 +34,25 @@ public sealed class FileSystemLibrary : LuaLibrary
     }
 
     [LuaMethod("readfile")]
-    public string ReadFile(string path)
-    {
-        return Data.ReadAllText(new ResPath(path));
-    }
+    public string ReadFile(string path) => Data.ReadAllText(new ResPath(path));
 
     [LuaMethod("writefile")]
-    public void WriteFile(string path, string content)
-    {
-        Data.WriteAllText(new ResPath(path), content);
-    }
+    public void WriteFile(string path, string content) => Data.WriteAllText(new ResPath(path), content);
 
     [LuaMethod("appendfile")]
-    public void AppendFile(string path, string content)
-    {
-        Data.AppendAllText(new ResPath(path), content);
-    }
+    public void AppendFile(string path, string content) => Data.AppendAllText(new ResPath(path), content);
 
     [LuaMethod("delete")]
-    public void Delete(string path)
-    {
-        Data.Delete(new ResPath(path));
-    }
+    public void Delete(string path) => Data.Delete(new ResPath(path));
 
     [LuaMethod("makefolder")]
-    public void MakeFolder(string path)
-    {
-        Data.CreateDir(new ResPath(path));
-    }
+    public void MakeFolder(string path) => Data.CreateDir(new ResPath(path));
 
     [LuaMethod("isfolder")]
-    public bool IsFolder(string path)
-    {
-        return Data.IsDir(new ResPath(path));
-    }
+    public bool IsFolder(string path) => Data.IsDir(new ResPath(path));
 
     [LuaMethod("isfile")]
-    public bool IsFile(string path)
-    {
-        return !IsFolder(path);
-    }
+    public bool IsFile(string path) => !IsFolder(path);
 
     [LuaMethod("listfiles")]
     public LuaTable ListFiles(string path)
