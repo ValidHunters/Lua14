@@ -24,13 +24,9 @@ public static class LuaZipLoader
 
         List<LuaMod> mods = [];
 
-        var files = Directory.EnumerateFiles(path);
+        var files = Directory.EnumerateFiles(path, "*.zip");
         foreach (var file in files)
         {
-            var fileExtension = Path.GetExtension(file);
-            if (fileExtension != ".zip")
-                continue;
-
             LuaMod mod = ReadZip(file);
             mods.Add(mod);
         }
@@ -70,9 +66,9 @@ public static class LuaZipLoader
         }
 
         if (config == null)
-            throw new Exception($"Unable to load config from ${path}");
+            throw new Exception($"Unable to load config from {path}");
         if (entries.Count == 0)
-            throw new Exception($"Zero lua files loaded from ${path}");
+            throw new Exception($"Zero lua files loaded from {path}");
 
         return new LuaMod(config, entries);
     }

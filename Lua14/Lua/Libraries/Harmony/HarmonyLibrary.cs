@@ -2,13 +2,20 @@
 using System.Reflection;
 using NLua;
 using Robust.Shared.IoC;
+using Lua14.Data;
 
 namespace Lua14.Lua.Libraries.Harmony;
 
 public sealed class HarmonyLibrary : LuaLibrary
 {
+    [Dependency] private readonly LuaMod _mod = default!;
     [Dependency] private readonly NLua.Lua _lua = default!;
-    [Dependency] private readonly HarmonyLib.Harmony _harmony = default!;
+    private HarmonyLib.Harmony _harmony = default!;
+
+    public override void Initialize()
+    {
+        _harmony = new HarmonyLib.Harmony(_mod.Config.Name);
+    }
 
     public override string Name => "harmony";
 
@@ -81,13 +88,36 @@ public sealed class HarmonyLibrary : LuaLibrary
         processor.Patch();
     }
 
+    [LuaMethod("unpatch")]
+    public void Unpatch(MethodBase original, string type = "all", string? id = null)
+    {
+        switch (type)
+        {
+            case "prefix":
+                _harmony.Unpatch(original, HarmonyPatchType.Prefix, id ?? _harmony.Id);
+                break;
+            case "postfix":
+                _harmony.Unpatch(original, HarmonyPatchType.Postfix, id ?? _harmony.Id);
+                break;
+            case "transpiler":
+                _harmony.Unpatch(original, HarmonyPatchType.Transpiler, id ?? _harmony.Id);
+                break;
+            case "finalizer":
+                _harmony.Unpatch(original, HarmonyPatchType.Finalizer, id ?? _harmony.Id);
+                break;
+            case "all":
+                _harmony.Unpatch(original, HarmonyPatchType.All, id ?? _harmony.Id);
+                break;
+        }
+    }
+
     [LuaMethod("unpatchAll")]
     public void UnpatchAll(string? id = null)
     {
         _harmony.UnpatchAll(id ?? _harmony.Id);
     }
 
-    static bool LuaPrefixProxy(object __instance, object[] __args, MethodBase __originalMethod)
+    private static bool LuaPrefixProxy(object __instance, object[] __args, MethodBase __originalMethod)
     {
         var (prefix, lua) = HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Prefix);
 
@@ -97,13 +127,13 @@ public sealed class HarmonyLibrary : LuaLibrary
 
         return true;
     }
-    static void LuaPostfixProxy(object __instance, object[] __args, ref object __result, MethodBase __originalMethod)
+    private static void LuaPostfixProxy(object __instance, object[] __args, ref object __result, MethodBase __originalMethod)
     {
         var (postfix, lua) = HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Postfix);
 
         postfix.Call(__instance, lua.EnumerableToTable(__args), __result);
     }
-    static IEnumerable<CodeInstruction> LuaTranspilerProxy(IEnumerable<CodeInstruction> instructions, MethodBase __originalMethod)
+    private static IEnumerable<CodeInstruction> LuaTranspilerProxy(IEnumerable<CodeInstruction> instructions, MethodBase __originalMethod)
     {
         var (transpiler, lua) = HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Transpiler);
 
@@ -115,7 +145,7 @@ public sealed class HarmonyLibrary : LuaLibrary
 
         return lua.TableToEnumerable<CodeInstruction>(instructionsTable) ?? instructions;
     }
-    static void LuaFinalizerProxy(Exception __exception, MethodBase __originalMethod)
+    private static void LuaFinalizerProxy(Exception __exception, MethodBase __originalMethod)
     {
         var (finalizer, _) = HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Finalizer);
 

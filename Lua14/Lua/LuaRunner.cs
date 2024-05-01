@@ -46,9 +46,6 @@ public class LuaRunner
         _deps.RegisterInstance<NLua.Lua>(_state);
         _deps.RegisterInstance<LuaMod>(_mod);
         _deps.RegisterInstance<LuaLogger>(_logger);
-        _deps.RegisterInstance<HarmonyLib.Harmony>(
-            new HarmonyLib.Harmony(_mod.Config.Name)
-        );
     }
 
     private void RegisterLibs() {
