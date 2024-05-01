@@ -29,7 +29,7 @@ public sealed class FileSystemLibrary : LuaLibrary
     {
         Data = (IWritableDirProvider) Activator.CreateInstance(
             _reflection.GetType("Robust.Shared.ContentPack.WritableDirProvider")!,
-            GetDataFolderPath()
+            Directory.CreateDirectory(GetDataFolderPath())
         )!;
     }
 
