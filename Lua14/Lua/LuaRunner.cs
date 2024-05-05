@@ -1,4 +1,5 @@
 ﻿using Lua14.Data;
+using NLua.Exceptions;
 using Robust.Shared.IoC;
 using Robust.Shared.Reflection;
 
@@ -69,10 +70,23 @@ public class LuaRunner
         }
     }
 
-    public object[] ExecuteMain() {
+    public object[] ExecuteMain()
+    {
         if (!_mod.TryFindFile(_mod.Config.MainFile, out var file))
             throw new Exception($"No file found with path {_mod.Config.MainFile}");
 
-        return _state.DoString(file.Content, _mod.Config.Name);
+        try
+        {
+            return _state.DoString(file.Content, _mod.Config.Name);
+        }
+        catch (LuaScriptException ex)
+        {
+            if (ex.IsNetException && ex.InnerException != null)
+            {
+                _logger.Error($"Error while executing a mod with name {_mod.Config.Name}. Source: ${ex.Source}");
+                throw ex.InnerException;
+            }
+            throw;
+        }
     }
 }
