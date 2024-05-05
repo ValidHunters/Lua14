@@ -2,11 +2,18 @@
 using Lua14.Lua;
 using Robust.Shared.ContentPack;
 using Robust.Shared.IoC;
+using System.Reflection;
 
 namespace Lua14;
 
 public sealed class EntryPoint : GameShared
 {
+    public override void PreInit()
+    {
+        Assembly subversionAssembly = Assembly.GetExecutingAssembly();
+        SubverterPatch.Harm.PatchAll(subversionAssembly);
+    }
+
     public override void PostInit()
     {
         MarseyLogger.Log(MarseyLogger.LogType.DEBG, "IoC BuildGraph started.");

@@ -14,7 +14,7 @@ public sealed class HarmonyLibrary : LuaLibrary
 
     public override void Initialize()
     {
-        _harmony = new HarmonyLib.Harmony(_mod.Config.Name);
+        _harmony = new HarmonyLib.Harmony("lua." + _mod.Config.Name);
     }
 
     public override string Name => "harmony";
