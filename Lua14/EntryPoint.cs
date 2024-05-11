@@ -1,4 +1,5 @@
-﻿using Lua14.Data;
+﻿using HarmonyLib;
+using Lua14.Data;
 using Lua14.Lua;
 using Robust.Shared.ContentPack;
 using Robust.Shared.IoC;
@@ -10,6 +11,8 @@ public sealed class EntryPoint : GameShared
 {
     public override void PreInit()
     {
+        Harmony.DEBUG = true;
+
         Assembly subversionAssembly = Assembly.GetExecutingAssembly();
         SubverterPatch.Harm.PatchAll(subversionAssembly);
     }

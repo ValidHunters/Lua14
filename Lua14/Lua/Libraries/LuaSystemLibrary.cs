@@ -5,13 +5,13 @@ using Robust.Shared.IoC;
 
 namespace Lua14.Lua.Libraries;
 
-public class LuaSystemLibrary : LuaLibrary
+public class LuaSystemLibrary(NLua.Lua lua) : LuaLibrary(lua)
 {
     [Dependency] private readonly EntityManager _entity = default!;
 
-    public override string Name => "lua_sys";
+    protected override string Name => "lua_sys";
 
-    [LuaMethod("addSystem")]
+    [LuaMember(Name = "addSystem")]
     public void AddSystem(LuaTable table)
     {
         _entity.EntitySysManager.SystemLoaded += (sender, args) => OnSystemLoaded(args.System, ToSystemTable(table));
@@ -20,7 +20,7 @@ public class LuaSystemLibrary : LuaLibrary
             luaSystem.PutLuaSystem(ToSystemTable(table));
     }
 
-    [LuaMethod("removeSystem")]
+    [LuaMember(Name = "removeSystem")]
     public void RemoveSystem(string id)
     {
         if (!_entity.Initialized || !_entity.TrySystem<LuaSystem>(out var luaSystem))

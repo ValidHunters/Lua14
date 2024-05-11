@@ -1,25 +1,20 @@
-﻿using System.Reflection;
+﻿using NLua;
 
 namespace Lua14.Lua;
 
-public abstract partial class LuaLibrary
+public abstract class LuaLibrary(NLua.Lua lua) : LuaUserdata(lua)
 {
-    public virtual bool IsLibraryGlobal { get { return false; } }
-    public abstract string Name { get; }
+    protected virtual bool CreateGlobalTable { get { return true; } }
+    protected abstract string Name { get; }
 
+    [LuaHide]
     public virtual void Initialize() { }
-    public void Register(NLua.Lua lua) {
-        if (!IsLibraryGlobal)
-            lua.NewTable(Name);
+    
+    [LuaHide]
+    public void Register() {
+        if (!CreateGlobalTable)
+            return;
 
-        var methods = GetType().GetMethods().Where(it => it.GetCustomAttributes(typeof(LuaMethodAttribute), false).Length != 0);
-        foreach(var method in methods)
-        {
-            var attr = method.GetCustomAttribute<LuaMethodAttribute>()!;
-            if (IsLibraryGlobal)
-                lua.RegisterFunction(attr.Name, this, method);
-            else
-                lua.RegisterFunction(Name + "." + attr.Name, this, method);
-        }
+        Lua[Name] = Userdata;
     }
 }

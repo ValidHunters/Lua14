@@ -5,10 +5,9 @@ using System.Reflection;
 
 namespace Lua14.Lua.Libraries;
 
-public sealed class ReflectionLibrary : LuaLibrary
+public sealed class ReflectionLibrary(NLua.Lua lua) : LuaLibrary(lua)
 {
     [Dependency] private readonly IReflectionManager _reflection = default!;
-    [Dependency] private readonly NLua.Lua _lua = default!;
 
     private static readonly BindingFlags _allFlags = BindingFlags.Public
             | BindingFlags.NonPublic
@@ -19,9 +18,9 @@ public sealed class ReflectionLibrary : LuaLibrary
             | BindingFlags.GetProperty
             | BindingFlags.SetProperty;
 
-    public override string Name => "reflection";
+    protected override string Name => "reflection";
 
-    [LuaMethod("getType")]
+    [LuaMember(Name = "getType")]
     public Type? GetType(string path)
     {
         if (path.StartsWith("System") || path.StartsWith("Lua14"))
@@ -29,7 +28,8 @@ public sealed class ReflectionLibrary : LuaLibrary
 
         return _reflection.GetType(path);
     }
-    [LuaMethod("getMethod")]
+
+    [LuaMember(Name = "getMethod")]
     public MethodInfo? GetMethod(Type type, string methodName, Type[]? parameters = null)
     {
         if (parameters is not null)
@@ -37,25 +37,28 @@ public sealed class ReflectionLibrary : LuaLibrary
 
         return type.GetMethod(methodName, _allFlags);
     }
-    [LuaMethod("getAllTypes")]
+
+    [LuaMember(Name = "getAllTypes")]
     public LuaTable FindAllTypes()
     {
         IEnumerable<Type> types = _reflection.FindAllTypes();
 
-        return _lua.EnumerableToTable(types);
+        return Lua.EnumerableToTable(types);
     }
-    [LuaMethod("findTypesWithAttribute")]
+
+    [LuaMember(Name = "findTypesWithAttribute")]
     public LuaTable FindTypesWithAttribute(Type attribute)
     {
         IEnumerable<Type> types = _reflection.FindTypesWithAttribute(attribute);
 
-        return _lua.EnumerableToTable(types);
+        return Lua.EnumerableToTable(types);
     }
-    [LuaMethod("getAllChildren")]
+
+    [LuaMember(Name = "getAllChildren")]
     public LuaTable GetAllChildren(Type baseType, bool inclusive = false)
     {
         IEnumerable<Type> types = _reflection.GetAllChildren(baseType, inclusive);
 
-        return _lua.EnumerableToTable(types);
+        return Lua.EnumerableToTable(types);
     }
 }
