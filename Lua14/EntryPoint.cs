@@ -11,8 +11,6 @@ public sealed class EntryPoint : GameShared
 {
     public override void PreInit()
     {
-        Harmony.DEBUG = true;
-
         Assembly subversionAssembly = Assembly.GetExecutingAssembly();
         SubverterPatch.Harm.PatchAll(subversionAssembly);
     }

@@ -1,14 +1,15 @@
-﻿using NLua;
+﻿using HarmonyLib;
+using NLua;
 using System.Reflection;
 
 namespace Lua14.Lua;
 
 public static class LuaExtensions
 {
-    private static readonly FieldInfo F_Translator = typeof(NLua.Lua)
-        .GetField("_translator", BindingFlags.NonPublic | BindingFlags.Instance) ?? throw new Exception("Field _translator doesnt exist on NLua.Lua");
-    private static readonly MethodInfo M_GetUserData = typeof(ObjectTranslator)
-        .GetMethod("GetUserData", BindingFlags.NonPublic | BindingFlags.Instance) ?? throw new Exception("Method GetUserData doesnt exist on ObjectTranslator");
+    private static readonly FieldInfo F_Translator = AccessTools.Field(typeof(NLua.Lua), "_translator")
+        ?? throw new Exception("Field _translator doesnt exist on NLua.Lua");
+    private static readonly MethodInfo M_GetUserData = AccessTools.Method(typeof(ObjectTranslator), "GetUserData")
+        ?? throw new Exception("Method GetUserData doesnt exist on ObjectTranslator");
 
     private const string TempPath = "_LUA14_TEMP";
 

@@ -6,19 +6,19 @@ using System.Reflection.Emit;
 namespace Lua14.Patches;
 
 /// <summary>
-/// fixes "instance method ... requires a non null target object"
+/// makes instance method callable without a target object
+/// example: fs.readfile("/e")
+/// instead of fs.readfile(fs, "/e")
 /// </summary>
 [HarmonyPatch(typeof(MetaFunctions), "GetMember")]
 public static class GetMemberPatch
 {
-    private static readonly FieldInfo F_Translator = typeof(MetaFunctions)
-        .GetField("_translator", BindingFlags.NonPublic | BindingFlags.Instance) ?? throw new Exception("Field _translator doesnt exist on NLua.MetaFunctions");
+    private static readonly FieldInfo F_Translator = AccessTools.Field(typeof(MetaFunctions), "_translator")
+        ?? throw new Exception("Field _translator doesnt exist on NLua.MetaFunctions");
 
     private static readonly Type LuaMethodWrapperType = AccessTools.TypeByName("NLua.Method.LuaMethodWrapper");
-    
-    private static readonly Type[] TargetWrapperParameters = [typeof(ObjectTranslator), typeof(object), typeof(ProxyType), typeof(MethodBase)];
-    private static readonly ConstructorInfo TargetWrapperCtor = AccessTools.Constructor(LuaMethodWrapperType, TargetWrapperParameters)
-        ?? throw new Exception("New constructor was not found");
+    private static readonly ConstructorInfo TargetWrapperCtor = AccessTools.Constructor(LuaMethodWrapperType, [typeof(ObjectTranslator), typeof(object), typeof(ProxyType), typeof(MethodBase)])
+        ?? throw new Exception("Target constructor was not found");
 
     /// <summary>
     /// replaces "var methodWrapper = new LuaMethodWrapper(_translator, objType, methodName, bindingType);"
