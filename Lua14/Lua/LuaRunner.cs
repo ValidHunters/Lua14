@@ -66,7 +66,7 @@ public class LuaRunner
             var library = (LuaLibrary)_deps.ResolveType(type);
 
             library.Initialize();
-            library.Register(_state);
+            library.Register();
         }
     }
 

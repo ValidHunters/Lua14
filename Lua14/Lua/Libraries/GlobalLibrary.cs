@@ -1,26 +1,32 @@
 ﻿using Lua14.Data;
+using NLua;
 using Robust.Shared.IoC;
 
 namespace Lua14.Lua.Libraries;
 
-public sealed class GlobalLibrary : LuaLibrary
+public sealed class GlobalLibrary(NLua.Lua lua) : LuaLibrary(lua)
 {
-    [Dependency] private readonly NLua.Lua _lua = default!;
     [Dependency] private readonly LuaLogger _logger = default!;
     [Dependency] private readonly LuaMod _mod = default!;
 
-    public override string Name => "global";
-    public override bool IsLibraryGlobal => true;
+    protected override string Name => "global";
+    protected override bool CreateGlobalTable => false;
 
     private readonly Dictionary<string, object[]> _loaded = [];
 
-    [LuaMethod("print")]
+    public override void Initialize()
+    {
+        Lua["print"] = Userdata["print"];
+        Lua["require"] = Userdata["require"];
+    }
+
+    [LuaMember(Name = "print")]
     public void Print(params object[] values)
     {
         _logger.Debug(string.Join(" ", values));
     }
 
-    [LuaMethod("require")]
+    [LuaMember(Name = "require")]
     public object[] Require(string path)
     {
         if (_loaded.TryGetValue(path, out var value))
@@ -31,7 +37,7 @@ public sealed class GlobalLibrary : LuaLibrary
         if (!_mod.TryFindFile(path, out var file))
             throw new Exception($"No file found with path {path}");
 
-        _loaded[path] = _lua.DoString(file?.Content, "require_chunk");
+        _loaded[path] = Lua.DoString(file?.Content, "require_chunk");
         return _loaded[path];
     }
 }

@@ -7,15 +7,14 @@ using System.Reflection;
 
 namespace Lua14.Lua.Libraries;
 
-public sealed class FileSystemLibrary : LuaLibrary
+public sealed class FileSystemLibrary(NLua.Lua lua) : LuaLibrary(lua)
 {
     [Dependency] private readonly IReflectionManager _reflection = default!;
-    [Dependency] private readonly NLua.Lua _lua = default!;
-    public IWritableDirProvider Data = default!;
+    private IWritableDirProvider Data = default!;
 
-    public override string Name => "fs";
+    protected override string Name => "fs";
 
-    public static string GetDataFolderPath()
+    private static string GetDataFolderPath()
     {
         var currentAssemblyPath = Assembly.GetExecutingAssembly().Location;
         var marseyModsPath = Path.GetDirectoryName(currentAssemblyPath);
@@ -33,32 +32,32 @@ public sealed class FileSystemLibrary : LuaLibrary
         )!;
     }
 
-    [LuaMethod("readfile")]
+    [LuaMember(Name = "readfile")]
     public string ReadFile(string path) => Data.ReadAllText(new ResPath(path));
 
-    [LuaMethod("writefile")]
+    [LuaMember(Name = "writefile")]
     public void WriteFile(string path, string content) => Data.WriteAllText(new ResPath(path), content);
 
-    [LuaMethod("appendfile")]
+    [LuaMember(Name = "appendfile")]
     public void AppendFile(string path, string content) => Data.AppendAllText(new ResPath(path), content);
 
-    [LuaMethod("delete")]
+    [LuaMember(Name = "delete")]
     public void Delete(string path) => Data.Delete(new ResPath(path));
 
-    [LuaMethod("makefolder")]
+    [LuaMember(Name = "makefolder")]
     public void MakeFolder(string path) => Data.CreateDir(new ResPath(path));
 
-    [LuaMethod("isfolder")]
+    [LuaMember(Name = "isfolder")]
     public bool IsFolder(string path) => Data.IsDir(new ResPath(path));
 
-    [LuaMethod("isfile")]
+    [LuaMember(Name = "isfile")]
     public bool IsFile(string path) => !IsFolder(path);
 
-    [LuaMethod("listfiles")]
+    [LuaMember(Name = "listfiles")]
     public LuaTable ListFiles(string path)
     {
         var entries = Data.DirectoryEntries(new ResPath(path));
 
-        return _lua.EnumerableToTable(entries);
+        return Lua.EnumerableToTable(entries);
     }
 }

@@ -6,10 +6,9 @@ using Lua14.Data;
 
 namespace Lua14.Lua.Libraries.Harmony;
 
-public sealed class HarmonyLibrary : LuaLibrary
+public sealed class HarmonyLibrary(NLua.Lua lua) : LuaLibrary(lua)
 {
     [Dependency] private readonly LuaMod _mod = default!;
-    [Dependency] private readonly NLua.Lua _lua = default!;
     private HarmonyLib.Harmony _harmony = default!;
 
     public override void Initialize()
@@ -17,9 +16,9 @@ public sealed class HarmonyLibrary : LuaLibrary
         _harmony = new HarmonyLib.Harmony("lua." + _mod.Config.Name);
     }
 
-    public override string Name => "harmony";
+    protected override string Name => "harmony";
 
-    [LuaMethod("patch")]
+    [LuaMember(Name = "patch")]
     public void Patch(
         MethodBase original,
         LuaFunction? prefix = null,
@@ -36,7 +35,7 @@ public sealed class HarmonyLibrary : LuaLibrary
                     CFunction = original,
                     Function = prefix,
                     Type = HarmonyPatchType.Prefix,
-                    State = _lua
+                    State = Lua
                 }
             );
             HarmonyMethod method = new(GetType(), "LuaPrefixProxy");
@@ -50,7 +49,7 @@ public sealed class HarmonyLibrary : LuaLibrary
                     CFunction = original,
                     Function = postfix,
                     Type = HarmonyPatchType.Postfix,
-                    State = _lua
+                    State = Lua
                 }
             );
             HarmonyMethod method = new(GetType(), "LuaPostfixProxy");
@@ -64,7 +63,7 @@ public sealed class HarmonyLibrary : LuaLibrary
                     CFunction = original,
                     Function = transpiler,
                     Type = HarmonyPatchType.Transpiler,
-                    State = _lua
+                    State = Lua
                 }
             );
             HarmonyMethod method = new(GetType(), "LuaTranspilerProxy");
@@ -78,7 +77,7 @@ public sealed class HarmonyLibrary : LuaLibrary
                     CFunction = original,
                     Function = finalizer,
                     Type = HarmonyPatchType.Finalizer,
-                    State = _lua
+                    State = Lua
                 }
             );
             HarmonyMethod method = new(GetType(), "LuaFinalizerProxy");
@@ -88,7 +87,7 @@ public sealed class HarmonyLibrary : LuaLibrary
         processor.Patch();
     }
 
-    [LuaMethod("unpatch")]
+    [LuaMember(Name = "unpatch")]
     public void Unpatch(MethodBase original, string type = "all", string? id = null)
     {
         switch (type)
@@ -111,7 +110,7 @@ public sealed class HarmonyLibrary : LuaLibrary
         }
     }
 
-    [LuaMethod("unpatchAll")]
+    [LuaMember(Name = "unpatchAll")]
     public void UnpatchAll(string? id = null)
     {
         _harmony.UnpatchAll(id ?? _harmony.Id);
