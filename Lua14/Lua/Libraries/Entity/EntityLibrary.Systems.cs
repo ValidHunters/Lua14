@@ -7,6 +7,11 @@ namespace Lua14.Lua.Libraries.Entity;
 
 public sealed partial class EntityLibrary
 {
+    private const string IdKey = "Id";
+    private const string InitializeKey = "Initialize";
+    private const string UpdateKey = "Update";
+    private const string ShutdownKey = "Shutdown";
+
     [LuaMember(Name = "addSystem")]
     public void AddSystem(LuaTable table)
     {
@@ -51,15 +56,15 @@ public sealed partial class EntityLibrary
 
     private static LuaSystemTable ToSystemTable(LuaTable table)
     {
-        if (table["Id"] is not string id)
+        if (table[IdKey] is not string id)
             throw new Exception("Field \"Id\" should be a string in your system table.");
 
         return new LuaSystemTable
         {
             Id = id,
-            Initialize = GetLuaFunction(table, "Initialize"),
-            Update = GetLuaFunction(table, "Update"),
-            Shutdown = GetLuaFunction(table, "Shutdown")
+            Initialize = GetLuaFunction(table, InitializeKey),
+            Update = GetLuaFunction(table, UpdateKey),
+            Shutdown = GetLuaFunction(table, ShutdownKey)
         };
     }
 
