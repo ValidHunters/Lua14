@@ -20,8 +20,8 @@ public sealed class ReflectionLibrary(NLua.Lua lua) : LuaLibrary(lua)
 
     protected override string Name => "reflection";
 
-    [LuaMember(Name = "getType")]
-    public Type? GetType(string path)
+    [LuaMember(Name = "type")]
+    public Type? Type(string path)
     {
         if (path.StartsWith("System") || path.StartsWith("Lua14"))
             return null;
@@ -29,8 +29,8 @@ public sealed class ReflectionLibrary(NLua.Lua lua) : LuaLibrary(lua)
         return _reflection.GetType(path);
     }
 
-    [LuaMember(Name = "getMethod")]
-    public MethodInfo? GetMethod(Type type, string methodName, Type[]? parameters = null)
+    [LuaMember(Name = "method")]
+    public MethodInfo? Method(Type type, string methodName, Type[]? parameters = null)
     {
         if (parameters is not null)
             return type.GetMethod(methodName, _allFlags, parameters);
@@ -38,8 +38,8 @@ public sealed class ReflectionLibrary(NLua.Lua lua) : LuaLibrary(lua)
         return type.GetMethod(methodName, _allFlags);
     }
 
-    [LuaMember(Name = "getAllTypes")]
-    public LuaTable FindAllTypes()
+    [LuaMember(Name = "allTypes")]
+    public LuaTable AllTypes()
     {
         IEnumerable<Type> types = _reflection.FindAllTypes();
 

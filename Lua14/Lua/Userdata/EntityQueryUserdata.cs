@@ -17,33 +17,30 @@ public sealed class EntityQueryUserdata : LuaUserdata
 
     public EntityQueryUserdata(NLua.Lua lua, EntityManager ent, Type[] types) : base(lua)
     {
-        var entTraitArray = (Dictionary<EntityUid, IComponent>[]?) F_EntTraitArray.GetValue(ent) ?? throw new Exception("_entTraitArray in EntityManager was null.");
+        var entTraitArray = (Dictionary<EntityUid, IComponent>[]?) F_EntTraitArray.GetValue(ent)
+            ?? throw new Exception("_entTraitArray in EntityManager was null.");
         var traitDicts = types
             .Select(type => entTraitArray[ArrayIndex(type)])
             .ToArray();
-        _query = new(traitDicts, ent.GetEntityQuery<MetaDataComponent>());
+
+        _query = new(traitDicts, ent.MetaQuery);
     }
 
     [LuaMember(Name = "next")]
     public object[]? Next()
     {
-        List<object> result = [];
-
         if (!_query.MoveNext(out var entityUid, out var comps))
             return null;
 
-        result.Add(entityUid);
-        result.AddRange(comps);
-
-        return [.. result];
+        return [entityUid, .. comps];
     }
 
-    protected override object[]? Call(params object[] args)
+    override protected object[]? Call(LuaUserdata self, params object[] args)
     {
         return Next();
     }
 
-    protected override LuaFunction Iter()
+    override protected LuaFunction Iter(LuaUserdata self)
     {
         return (LuaFunction)Userdata["next"];
     }
@@ -86,11 +83,7 @@ public sealed class EntityQueryUserdata : LuaUserdata
                     continue;
                 }
 
-                var list = new List<IComponent>
-                {
-                    current.Value
-                };
-
+                List<IComponent> list = [];
                 var skip = false;
                 foreach (var traitDict in _traitDicts)
                 {
@@ -106,7 +99,7 @@ public sealed class EntityQueryUserdata : LuaUserdata
                     continue;
 
                 uid = current.Key;
-                comps = [.. list];
+                comps = [current.Value, .. list];
                 return true;
             }
         }

@@ -11,6 +11,14 @@ public sealed partial class EntityLibrary(NLua.Lua lua) : LuaLibrary(lua)
 
     protected override string Name => "entity";
 
+    [LuaMember(Name = "index")]
+    public ComponentIndexUserdata[] Index(params Type[] types)
+    {
+        return types
+            .Select(compType => new ComponentIndexUserdata(Lua, compType))
+            .ToArray();
+    }
+
     [LuaMember(Name = "get")]
     public IComponent[] Get(EntityUid uid, params Type[] types)
     {
@@ -20,8 +28,8 @@ public sealed partial class EntityLibrary(NLua.Lua lua) : LuaLibrary(lua)
     }
 
     [LuaMember(Name = "query")]
-    public LuaUserData Query(params Type[] types)
+    public EntityQueryUserdata Query(params Type[] types)
     {
-        return new EntityQueryUserdata(Lua, _entity, types).Userdata;
+        return new EntityQueryUserdata(Lua, _entity, types);
     }
 }

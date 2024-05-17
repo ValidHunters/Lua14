@@ -40,7 +40,7 @@ public class LuaUserdata
     /// </summary>
     /// <param name="args">The arguments that were passed.</param>
     /// <exception cref="NotImplementedException"></exception>
-    protected virtual object? Call(params object[] args)
+    protected virtual object? Call(LuaUserdata self, params object[] args)
     {
         throw new NotImplementedException();
     }
@@ -48,7 +48,7 @@ public class LuaUserdata
     /// <summary>
     /// 	Used to denote a custom iterator when using generalized iteration.
     /// </summary>
-    protected virtual LuaFunction Iter()
+    protected virtual LuaFunction Iter(LuaUserdata self)
     {
         throw new NotImplementedException();
     }
