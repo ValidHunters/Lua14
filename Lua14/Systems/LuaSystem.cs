@@ -1,4 +1,5 @@
 using NLua;
+using NLua.Exceptions;
 using Robust.Shared.GameObjects;
 
 namespace Lua14.Systems;
@@ -23,7 +24,18 @@ public class LuaSystem : EntitySystem
         base.Update(frameTime);
         foreach (var table in _systems)
         {
-            table.Update?.Call(frameTime);
+            try
+            {
+                table.Update?.Call(frameTime);
+            }
+            catch (LuaScriptException ex)
+            {
+                if (ex.IsNetException && ex.InnerException != null)
+                {
+                    throw ex.InnerException;
+                }
+                throw;
+            }
         }
     }
 

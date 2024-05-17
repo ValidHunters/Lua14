@@ -1,4 +1,5 @@
-﻿using NLua;
+﻿using Lua14.Lua.Userdata;
+using NLua;
 using Robust.Shared.GameObjects;
 using Robust.Shared.IoC;
 
@@ -16,5 +17,11 @@ public sealed partial class EntityLibrary(NLua.Lua lua) : LuaLibrary(lua)
         return types
             .Select(compType => _entity.GetComponent(uid, compType))
             .ToArray();
+    }
+
+    [LuaMember(Name = "query")]
+    public LuaUserData Query(params Type[] types)
+    {
+        return new EntityQueryUserdata(Lua, _entity, types).Userdata;
     }
 }
