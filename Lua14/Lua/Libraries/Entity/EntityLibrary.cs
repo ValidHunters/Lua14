@@ -32,4 +32,34 @@ public sealed partial class EntityLibrary(NLua.Lua lua) : LuaLibrary(lua)
     {
         return new EntityQueryUserdata(Lua, _entity, indexes);
     }
+
+    [LuaMember(Name = "insert")]
+    public void Insert(EntityUid uid, params IComponent[] comps)
+    {
+        foreach (var comp in comps)
+        {
+            _entity.AddComponent(uid, comp, true);
+        }
+    }
+
+    [LuaMember(Name = "remove")]
+    public void Remove(EntityUid uid, params ComponentIndexUserdata[] indexes)
+    {
+        foreach (var index in indexes)
+        {
+            _entity.RemoveComponent(uid, index.Type);
+        }
+    }
+
+    [LuaMember(Name = "despawn")]
+    public void Despawn(EntityUid uid)
+    {
+        _entity.QueueDeleteEntity(uid);
+    }
+
+    [LuaMember(Name = "size")]
+    public int Size()
+    {
+        return _entity.EntityCount;
+    }
 }
