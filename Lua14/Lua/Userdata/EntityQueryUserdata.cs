@@ -6,6 +6,9 @@ using System.Reflection;
 
 namespace Lua14.Lua.Userdata;
 
+/// <summary>
+/// EntityQueryEnumerator but for lua
+/// </summary>
 public sealed class EntityQueryUserdata : LuaUserdata
 {
     private static readonly FieldInfo F_EntTraitArray = AccessTools.Field(typeof(EntityManager), "_entTraitArray");
@@ -47,31 +50,30 @@ public sealed class EntityQueryUserdata : LuaUserdata
 
     private struct LuaEntityQueryEnumerator: IDisposable
     {
-        private Dictionary<EntityUid, IComponent>.Enumerator _traitDict;
+        private Dictionary<EntityUid, IComponent>.Enumerator _enumerator;
         private readonly Dictionary<EntityUid, IComponent>[] _traitDicts;
         private readonly EntityQuery<MetaDataComponent> _metaQuery;
 
         public LuaEntityQueryEnumerator(Dictionary<EntityUid, IComponent>[] traitDicts, EntityQuery<MetaDataComponent> metaQuery)
         {
-            _traitDict = traitDicts[0].GetEnumerator();
-            _traitDicts = traitDicts
-                .Skip(1)
-                .ToArray();
+            _enumerator = traitDicts[0].GetEnumerator();
+            _traitDicts = traitDicts;
             _metaQuery = metaQuery;
         }
 
         public bool MoveNext(out EntityUid uid, [NotNullWhen(true)] out IComponent[]? comps)
         {
+            List<IComponent> compsList = [];
             while (true)
             {
-                if (!_traitDict.MoveNext())
+                if (!_enumerator.MoveNext())
                 {
                     uid = default;
                     comps = default;
                     return false;
                 }
 
-                var current = _traitDict.Current;
+                var current = _enumerator.Current;
 
                 if (current.Value.Deleted)
                 {
@@ -83,7 +85,6 @@ public sealed class EntityQueryUserdata : LuaUserdata
                     continue;
                 }
 
-                List<IComponent> list = [];
                 var skip = false;
                 foreach (var traitDict in _traitDicts)
                 {
@@ -92,21 +93,21 @@ public sealed class EntityQueryUserdata : LuaUserdata
                         skip = true;
                         continue;
                     }
-                    list.Add(compObj);
+                    compsList.Add(compObj);
                 }
 
                 if (skip)
                     continue;
 
                 uid = current.Key;
-                comps = [current.Value, .. list];
+                comps = [.. compsList];
                 return true;
             }
         }
 
         public void Dispose()
         {
-            _traitDict.Dispose();
+            _enumerator.Dispose();
         }
     }
 }

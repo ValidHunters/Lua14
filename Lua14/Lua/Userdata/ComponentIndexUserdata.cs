@@ -25,7 +25,7 @@ public sealed class ComponentIndexUserdata : LuaUserdata
             throw new Exception("First argument should be a table.");
 
         var paramsDict = Lua.TableToDictionary<string, object?>(parameters) ?? throw new Exception("First argument should be a table<string, any>.");
-        var comp = Activator.CreateInstance(Type)!;
+        var comp = Activator.CreateInstance(Type) ?? throw new InvalidOperationException("Could not create instance of type."); ;
 
         LuaUserData compUserdata = Lua.ObjectToUserdata(comp);
         foreach (var (key, value) in paramsDict)
