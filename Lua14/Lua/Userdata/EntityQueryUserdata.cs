@@ -15,12 +15,12 @@ public sealed class EntityQueryUserdata : LuaUserdata
 
     private LuaEntityQueryEnumerator _query;
 
-    public EntityQueryUserdata(NLua.Lua lua, EntityManager ent, Type[] types) : base(lua)
+    public EntityQueryUserdata(NLua.Lua lua, EntityManager ent, ComponentIndexUserdata[] indexes) : base(lua)
     {
         var entTraitArray = (Dictionary<EntityUid, IComponent>[]?) F_EntTraitArray.GetValue(ent)
             ?? throw new Exception("_entTraitArray in EntityManager was null.");
-        var traitDicts = types
-            .Select(type => entTraitArray[ArrayIndex(type)])
+        var traitDicts = indexes
+            .Select(index => entTraitArray[ArrayIndex(index.Type)])
             .ToArray();
 
         _query = new(traitDicts, ent.MetaQuery);

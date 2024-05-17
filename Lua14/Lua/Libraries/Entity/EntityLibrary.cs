@@ -20,16 +20,16 @@ public sealed partial class EntityLibrary(NLua.Lua lua) : LuaLibrary(lua)
     }
 
     [LuaMember(Name = "get")]
-    public IComponent[] Get(EntityUid uid, params Type[] types)
+    public IComponent[] Get(EntityUid uid, params ComponentIndexUserdata[] indexes)
     {
-        return types
-            .Select(compType => _entity.GetComponent(uid, compType))
+        return indexes
+            .Select(compType => _entity.GetComponent(uid, compType.Type))
             .ToArray();
     }
 
     [LuaMember(Name = "query")]
-    public EntityQueryUserdata Query(params Type[] types)
+    public EntityQueryUserdata Query(params ComponentIndexUserdata[] indexes)
     {
-        return new EntityQueryUserdata(Lua, _entity, types);
+        return new EntityQueryUserdata(Lua, _entity, indexes);
     }
 }
