@@ -16,8 +16,8 @@ public sealed class GlobalLibrary(NLua.Lua lua) : LuaLibrary(lua)
 
     public override void Initialize()
     {
-        Lua["print"] = Userdata["print"];
-        Lua["require"] = Userdata["require"];
+        Lua["print"] = this["print"];
+        Lua["require"] = this["require"];
     }
 
     [LuaMember(Name = "print")]

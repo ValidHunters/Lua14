@@ -15,6 +15,6 @@ public abstract class LuaLibrary(NLua.Lua lua) : LuaUserdata(lua)
         if (!CreateGlobalTable)
             return;
 
-        Lua[Name] = Userdata;
+        Lua[Name] = this;
     }
 }

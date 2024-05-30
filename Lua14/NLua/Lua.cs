@@ -904,6 +904,18 @@ namespace NLua
             _luaState.SetTop( oldTop);
         }
 
+        /// <summary>
+		/// Creates a new empty table
+		/// </summary>
+		public LuaTable NewTable()
+		{
+			var oldTop = State.GetTop();
+			State.NewTable();
+			var ret = Translator.GetTable(State, -1);
+			State.SetTop(oldTop);
+			return ret;
+		}
+
         public Dictionary<object, object> GetTableDict(LuaTable table)
         {
             if (table == null)
