@@ -1088,21 +1088,21 @@ namespace NLua
         }
 
         /*
-         * If the given object is an ITuple value type (e.g. ValueTuple) all elements
+         * If the given object is an array all elements
          * of it are pushed onto the stack. Otherwise the element is pushed as is,
          * according to it's type.
          */
         public int PushMultiple(LuaState luaState, object o)
         {
 #if NETCOREAPP1_1_OR_GREATER
-            if (o is ITuple tuple && o.GetType().IsValueType)
+            if (o is object[] array)
             {
-                for (int i = 0; i < tuple.Length; ++i)
+                for (int i = 0; i < array.Length; ++i)
                 {
-                    Push(luaState, tuple[i]);
+                    Push(luaState, array[i]);
                 }
 
-                return tuple.Length;
+                return array.Length;
             }
 #endif
             Push(luaState, o);
