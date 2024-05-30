@@ -21,7 +21,7 @@ public sealed class ReflectionLibrary(NLua.Lua lua) : LuaLibrary(lua)
     protected override string Name => "reflection";
 
     [LuaMember(Name = "getType")]
-    public Type? GetType(string path)
+    public Type GetType(string path)
     {
         if (path.StartsWith("System") || path.StartsWith("Lua14"))
             return null;
@@ -30,7 +30,7 @@ public sealed class ReflectionLibrary(NLua.Lua lua) : LuaLibrary(lua)
     }
 
     [LuaMember(Name = "getMethod")]
-    public MethodInfo? GetMethod(Type type, string methodName, Type[]? parameters = null)
+    public MethodInfo GetMethod(Type type, string methodName, Type[] parameters = null)
     {
         if (parameters is not null)
             return type.GetMethod(methodName, _allFlags, parameters);

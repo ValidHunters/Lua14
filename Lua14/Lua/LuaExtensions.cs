@@ -22,7 +22,7 @@ public static class LuaExtensions
         return table;
     }
 
-    public static void SetFunction(this NLua.Lua lua, LuaTable table, string path, MethodBase method, object? target = null)
+    public static void SetFunction(this NLua.Lua lua, LuaTable table, string path, MethodBase method, object target = null)
     {
         lua[TempPath] = table;
         lua.RegisterFunction($"{TempPath}.{path}", target, method);
@@ -42,7 +42,7 @@ public static class LuaExtensions
         return table;
     }
 
-    public static Dictionary<T1, T2>? TableToDictionary<T1, T2>(this NLua.Lua lua, LuaTable table) where T1 : notnull
+    public static Dictionary<T1, T2> TableToDictionary<T1, T2>(this NLua.Lua lua, LuaTable table) where T1 : notnull
     {
         Dictionary<object, object> dictionary = lua.GetTableDict(table);
         Dictionary<T1, T2> result = [];
@@ -58,7 +58,7 @@ public static class LuaExtensions
         return result;
     }
 
-    public static IEnumerable<T>? TableToEnumerable<T>(this NLua.Lua lua, LuaTable table)
+    public static IEnumerable<T> TableToEnumerable<T>(this NLua.Lua lua, LuaTable table)
     {
         var dictionary = lua.TableToDictionary<int, T>(table);
         if (dictionary == null)
@@ -73,7 +73,7 @@ public static class LuaExtensions
         return result;
     }
 
-    public static LuaTable? GetMetatable(this NLua.Lua lua, LuaTable table)
+    public static LuaTable GetMetatable(this NLua.Lua lua, LuaTable table)
     {
         return lua.GetFunction("getmetatable").Call(table).FirstOrDefault() as LuaTable;
     }
@@ -86,7 +86,7 @@ public static class LuaExtensions
     /// <summary>
     /// gets an object from a LuaTable, ignoring its metatable
     /// </summary>
-    public static object? RawGet(this NLua.Lua lua, LuaTable table, object key)
+    public static object RawGet(this NLua.Lua lua, LuaTable table, object key)
     {
         return lua.GetFunction("rawget").Call(table, key).FirstOrDefault();
     }
@@ -115,7 +115,7 @@ public static class LuaExtensions
         return userdata;
     }
 
-    public static LuaTable? GetMetatable(this NLua.Lua lua, LuaUserData userdata)
+    public static LuaTable GetMetatable(this NLua.Lua lua, LuaUserData userdata)
     {
         return lua.GetFunction("getmetatable").Call(userdata).FirstOrDefault() as LuaTable;
     }
@@ -132,7 +132,7 @@ public static class LuaExtensions
         return (ObjectTranslator)F_Translator.GetValue(lua)!;
     }
 
-    public static LuaUserData GetUserdata(this ObjectTranslator translator, KeraLua.Lua luaState, int index)
+    public static LuaUserData GetUserdata(this ObjectTranslator translator, NLua.Native.LuaState luaState, int index)
     {
         return (LuaUserData)M_GetUserData.Invoke(translator, [luaState, index])!;
     }

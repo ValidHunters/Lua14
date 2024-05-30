@@ -37,7 +37,7 @@ public static class LuaZipLoader
     {
         ZipArchive archive = ZipFile.OpenRead(path);
 
-        LuaConfig? config = null;
+        LuaConfig config = null;
         List<LuaFile> entries = [];
         foreach (ZipArchiveEntry entry in archive.Entries)
         {

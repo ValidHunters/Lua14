@@ -13,7 +13,7 @@ public sealed class LuaMod
         Entries = entries;
     }
 
-    public bool TryFindFile(string relativePath, [NotNullWhen(true)] out LuaFile? file)
+    public bool TryFindFile(string relativePath, [NotNullWhen(true)] out LuaFile file)
     {
         foreach (var entry in Entries)
         {

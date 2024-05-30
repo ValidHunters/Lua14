@@ -15,7 +15,7 @@ public static class MarseyLogger
     // Делегат приводится загрузчиком к Marsey::Utility::Log(AssemblyName, string) во время выполнения
     public delegate void Forward(AssemblyName asm, string message);
 
-    public static Forward? logDelegate;
+    public static Forward logDelegate;
 
     public static void Log(LogType type, string message)
     {

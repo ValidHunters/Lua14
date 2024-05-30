@@ -45,7 +45,7 @@ public class LuaSystem : EntitySystem
 public struct LuaSystemTable
 {
     public string Id;
-    public LuaFunction? Initialize;
-    public LuaFunction? Update;
-    public LuaFunction? Shutdown;
+    public LuaFunction Initialize;
+    public LuaFunction Update;
+    public LuaFunction Shutdown;
 }

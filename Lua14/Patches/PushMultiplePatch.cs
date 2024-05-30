@@ -1,5 +1,5 @@
 ﻿using HarmonyLib;
-using LuaState = KeraLua.Lua;
+using LuaState = NLua.Native.LuaState;
 using NLua;
 using System.Reflection;
 
