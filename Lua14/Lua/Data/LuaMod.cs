@@ -5,7 +5,6 @@ namespace Lua14.Lua.Data;
 public sealed class LuaMod
 {
     public readonly LuaConfig Config;
-    public readonly List<LuaFile> Entries;
 
     public LuaMod(LuaConfig config, List<LuaFile> entries)
     {
