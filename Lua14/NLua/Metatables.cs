@@ -919,7 +919,7 @@ namespace NLua
                     else
                     {
                         // Member type must be 'method'
-                        var methodWrapper = new LuaMethodWrapper(_translator, objType, methodName, bindingType);
+                        var methodWrapper = new LuaMethodWrapper(_translator, obj, objType, (MethodBase)member);
                         var wrapper = methodWrapper.InvokeFunction;
 
                         if (cachedMember == null)
