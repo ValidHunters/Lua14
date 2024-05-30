@@ -2,7 +2,7 @@
 using System.Reflection;
 using NLua;
 using Robust.Shared.IoC;
-using Lua14.Data;
+using Lua14.Lua.Data;
 
 namespace Lua14.Lua.Libraries.Harmony;
 

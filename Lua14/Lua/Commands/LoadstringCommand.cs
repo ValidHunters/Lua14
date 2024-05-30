@@ -1,8 +1,7 @@
 ﻿#if DEBUG
 
 using Content.Shared.Administration;
-using Lua14.Data;
-using Lua14.Lua;
+using Lua14.Lua.Data;
 using Robust.Shared.Console;
 
 namespace Lua14.Lua.Commands
