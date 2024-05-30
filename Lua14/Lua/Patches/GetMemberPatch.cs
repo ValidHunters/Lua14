@@ -3,7 +3,7 @@ using NLua;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace Lua14.Patches;
+namespace Lua14.Lua.Patches;
 
 /// <summary>
 /// makes instance method callable without a target object

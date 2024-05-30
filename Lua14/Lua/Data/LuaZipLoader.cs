@@ -3,7 +3,7 @@ using System.IO.Compression;
 using System.Reflection;
 using System.Text.Json;
 
-namespace Lua14.Data;
+namespace Lua14.Lua.Data;
 
 public static class LuaZipLoader
 {

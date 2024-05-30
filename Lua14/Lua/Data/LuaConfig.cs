@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Lua14.Data;
+namespace Lua14.Lua.Data;
 
 public class LuaConfig
 {

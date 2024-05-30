@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace Lua14.Data;
+namespace Lua14.Lua.Data;
 
 public sealed class LuaMod
 {

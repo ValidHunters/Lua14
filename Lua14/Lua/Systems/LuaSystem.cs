@@ -1,7 +1,7 @@
 using NLua;
 using Robust.Shared.GameObjects;
 
-namespace Lua14.Systems;
+namespace Lua14.Lua.Systems;
 
 public class LuaSystem : EntitySystem
 {

@@ -3,7 +3,7 @@ using LuaState = NLua.Native.LuaState;
 using NLua;
 using System.Reflection;
 
-namespace Lua14.Patches;
+namespace Lua14.Lua.Patches;
 
 /// <summary>
 /// extracts arrays as tuples

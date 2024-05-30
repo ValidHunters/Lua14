@@ -5,7 +5,7 @@ using Lua14.Data;
 using Lua14.Lua;
 using Robust.Shared.Console;
 
-namespace Lua14.Commands
+namespace Lua14.Lua.Commands
 {
     [AnyCommand]
     internal sealed class LoadstringCommand : LocalizedCommands
