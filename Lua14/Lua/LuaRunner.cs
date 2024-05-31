@@ -1,4 +1,4 @@
-﻿using Lua14.Lua.Data;
+﻿using Lua14.Lua.Data.Structures;
 using NLua.Exceptions;
 using Robust.Shared.IoC;
 using Robust.Shared.Reflection;
@@ -13,11 +13,11 @@ public class LuaRunner
     private readonly IDependencyCollection _deps;
     private readonly List<Type> _librariesTypes = [];
 
-    private readonly LuaMod _mod;
+    private readonly Mod _mod;
     private readonly LuaLogger _logger;
     private readonly NLua.Lua _state = new();
 
-    public LuaRunner(LuaMod mod)
+    public LuaRunner(Mod mod)
     {
         IoCManager.InjectDependencies(this);
         _mod = mod;
@@ -45,7 +45,7 @@ public class LuaRunner
     private void RegisterIoC()
     {
         _deps.RegisterInstance<NLua.Lua>(_state);
-        _deps.RegisterInstance<LuaMod>(_mod);
+        _deps.RegisterInstance<Mod>(_mod);
         _deps.RegisterInstance<LuaLogger>(_logger);
     }
 
@@ -72,12 +72,12 @@ public class LuaRunner
 
     public object[] ExecuteMain()
     {
-        if (!_mod.TryFindFile(_mod.Config.MainFile, out var file))
+        if (!_mod.TryFindChunk(_mod.Config.MainFile, out var mainChunk))
             throw new Exception($"No file found with path {_mod.Config.MainFile}");
 
         try
         {
-            return _state.DoString(file.Content, _mod.Config.Name);
+            return _state.DoString(mainChunk.Content, _mod.Config.Name);
         }
         catch (LuaScriptException ex)
         {

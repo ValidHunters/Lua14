@@ -2,13 +2,13 @@
 using System.Reflection;
 using NLua;
 using Robust.Shared.IoC;
-using Lua14.Lua.Data;
+using Lua14.Lua.Data.Structures;
 
 namespace Lua14.Lua.Libraries.Harmony;
 
 public sealed class HarmonyLibrary(NLua.Lua lua) : LuaLibrary(lua)
 {
-    [Dependency] private readonly LuaMod _mod = default!;
+    [Dependency] private readonly Mod _mod = default!;
     private HarmonyLib.Harmony _harmony = default!;
 
     public override void Initialize()

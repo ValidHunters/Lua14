@@ -1,7 +1,7 @@
 ﻿#if DEBUG
 
 using Content.Shared.Administration;
-using Lua14.Lua.Data;
+using Lua14.Lua.Data.Structures;
 using Robust.Shared.Console;
 
 namespace Lua14.Lua.Commands
@@ -13,9 +13,9 @@ namespace Lua14.Lua.Commands
 
         public override void Execute(IConsoleShell shell, string argStr, string[] args)
         {
-            var mod = new LuaMod(
-                new LuaConfig() { MainFile = "loadstring.lua", Name = "loadstring" },
-                [new LuaFile(
+            var mod = new Mod(
+                new Config() { MainFile = "loadstring.lua", Name = "loadstring" },
+                [new Chunk(
                     "loadstring.lua", args[0]
                 )]
             );
