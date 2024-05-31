@@ -56,7 +56,7 @@ public class LuaUserdata
     /// </summary>
     protected virtual object Index(LuaUserdata self, object index)
     {
-        return __index.Call(index);
+        return __index.Call(self, index);
     }
 
     /// <summary>
@@ -64,7 +64,7 @@ public class LuaUserdata
     /// </summary>
     protected virtual void NewIndex(LuaUserdata self, object index, object value)
     {
-        __newindex.Call(index, value);
+        __newindex.Call(self, index, value);
     }
 
     /// <summary>
@@ -74,7 +74,7 @@ public class LuaUserdata
     /// <param name="args">The arguments that were passed.</param>
     protected virtual object Call(LuaUserdata self, params object[] args)
     {
-        return M_Call.Invoke(__call, args);
+        return M_Call.Invoke(__call, [self, ..args]);
     }
 
     /// <summary>
@@ -87,7 +87,7 @@ public class LuaUserdata
 
     public object this[string index]
     {
-        get => __index.Call(index);
-        set => __newindex.Call(index, value);
+        get => __index.Call(this, index);
+        set => __newindex.Call(this, index, value);
     }
 }
