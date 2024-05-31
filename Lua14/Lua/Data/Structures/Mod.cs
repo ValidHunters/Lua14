@@ -16,11 +16,11 @@ public class Mod
     public readonly Config Config;
     public readonly Chunk[] Chunks;
 
-    public bool TryFindChunk(string path, [NotNullWhen(true)] out Chunk result)
+    public bool TryFindChunk(string relativePath, [NotNullWhen(true)] out Chunk result)
     {
         foreach (var chunk in Chunks)
         {
-            if (chunk.Path == path)
+            if (chunk.RelativePath == relativePath)
             {
                 result = chunk;
                 return true;

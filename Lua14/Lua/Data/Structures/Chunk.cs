@@ -2,12 +2,12 @@
 
 public readonly struct Chunk
 {
-    public Chunk(string path, string content)
+    public Chunk(string relativePath, string content)
     {
-        Path = path;
+        RelativePath = relativePath;
         Content = content;
     }
 
-    public string Path { get; init; }
+    public string RelativePath { get; init; }
     public string Content { get; init; }
 }

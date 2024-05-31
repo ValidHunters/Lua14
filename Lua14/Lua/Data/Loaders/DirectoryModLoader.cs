@@ -17,7 +17,8 @@ public sealed class DirectoryModLoader : ModLoader
             {
                 case ".lua":
                     Stream chunkStream = File.OpenRead(file);
-                    Chunk chunk = ReadChunk(chunkStream, file);
+                    var relativePath = GetRelativePath(path, file);
+                    Chunk chunk = ReadChunk(chunkStream, relativePath);
                     chunks.Add(chunk);
                     break;
                 case ".json":
@@ -38,5 +39,10 @@ public sealed class DirectoryModLoader : ModLoader
             throw new Exception($"Zero lua chunks loaded from {path}.");
 
         return new Mod(config.Value, [.. chunks]);
+    }
+
+    private static string GetRelativePath(string rootPath, string fullPath)
+    {
+        return fullPath.Substring(rootPath.Length + 1);
     }
 }
