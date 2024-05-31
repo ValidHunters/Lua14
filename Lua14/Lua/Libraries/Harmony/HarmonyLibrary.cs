@@ -13,7 +13,7 @@ public sealed class HarmonyLibrary(NLua.Lua lua) : LuaLibrary(lua)
 
     public override void Initialize()
     {
-        _harmony = new HarmonyLib.Harmony("lua." + _mod.Config.Name);
+        _harmony = new HarmonyLib.Harmony("lua." + _mod.Name);
     }
 
     protected override string Name => "harmony";

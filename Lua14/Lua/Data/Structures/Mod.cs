@@ -10,6 +10,9 @@ public class Mod
         Chunks = chunks;
     }
 
+    public string Name => Config.Name;
+    public string MainFile => Config.MainFile;
+
     public readonly Config Config;
     public readonly Chunk[] Chunks;
 

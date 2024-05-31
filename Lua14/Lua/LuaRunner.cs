@@ -21,7 +21,7 @@ public class LuaRunner
     {
         IoCManager.InjectDependencies(this);
         _mod = mod;
-        _logger = new(mod.Config.Name);
+        _logger = new(mod.Name);
 
         _deps = _gameDeps.FromParent(_gameDeps); // new DependencyCollection(_gameDeps)
 
@@ -72,18 +72,18 @@ public class LuaRunner
 
     public object[] ExecuteMain()
     {
-        if (!_mod.TryFindChunk(_mod.Config.MainFile, out var mainChunk))
-            throw new Exception($"No file found with path {_mod.Config.MainFile}");
+        if (!_mod.TryFindChunk(_mod.MainFile, out var mainChunk))
+            throw new Exception($"No file found with path {_mod.MainFile}");
 
         try
         {
-            return _state.DoString(mainChunk.Content, _mod.Config.Name);
+            return _state.DoString(mainChunk.Content, _mod.Name);
         }
         catch (LuaScriptException ex)
         {
             if (ex.IsNetException && ex.InnerException != null)
             {
-                _logger.Error($"Error while executing a mod with name {_mod.Config.Name}. Source: ${ex.Source}");
+                _logger.Error($"Error while executing a mod with name {_mod.Name}. Source: ${ex.Source}");
                 throw ex.InnerException;
             }
             throw;

@@ -36,7 +36,7 @@ public sealed class EntryPoint : GameShared
             }
             catch (Exception e)
             {
-                MarseyLogger.Log(MarseyLogger.LogType.FATL, $"Failed to start mod with name {mod.Config.Name}");
+                MarseyLogger.Log(MarseyLogger.LogType.FATL, $"Failed to start mod with name {mod.Name}");
                 MarseyLogger.Log(MarseyLogger.LogType.FATL, $"Exception: {e}");
             }
         }
