@@ -9,46 +9,36 @@ public class LuaUserdata
     private static readonly MethodInfo M_Call = AccessTools.Method(typeof(LuaFunction), "Call");
 
     protected readonly NLua.Lua Lua;
-    protected readonly LuaTable Metatable;
 
-    // metamethods
-    private readonly LuaFunction __index;
-    private readonly LuaFunction __newindex;
-    private readonly LuaFunction __call;
+    private readonly LuaTable _metatable;
+    private readonly Dictionary<string, LuaFunction> _originalMetamethods = [];
 
     public LuaUserdata(NLua.Lua state)
     {
         Lua = state;
-        Metatable = Lua.GetMetatable(this) ?? throw new Exception("No metatable found for a c# userdata.");
-
-        __index = GetMetaMethod("__index");
-        __newindex = GetMetaMethod("__newindex");
-        __call = GetMetaMethod("__call");
+        _metatable = Lua.GetMetatable(this) ?? throw new Exception("No metatable found for a c# userdata.");
 
         RegisterMetaMethods();
     }
 
-    private LuaFunction GetMetaMethod(string metamethod)
-    {
-        return (LuaFunction)Metatable[metamethod];
-    }
-
     private void RegisterMetaMethods()
     {
-        RegisterFunction(Metatable, "__index", "Index");
-        RegisterFunction(Metatable, "__newindex", "NewIndex");
-        RegisterFunction(Metatable, "__iter", "Iter");
-        RegisterFunction(Metatable, "__call", "Call");
+        RegisterMetaMethod("__index", "Index");
+        RegisterMetaMethod("__newindex", "NewIndex");
+        RegisterMetaMethod("__call", "Call");
+        RegisterMetaMethod("__iter", "Iter");
     }
 
-    private void RegisterFunction(LuaTable table, string index, string methodName)
+    private void RegisterMetaMethod(string metamethod, string methodName)
     {
-        Lua.SetFunction(
-            table,
-            index,
-            GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance)!,
+        LuaFunction func = Lua.CreateFunction(
+            GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance),
             this
         );
+        LuaFunction wrappedFunc = Lua.WrapFunction(func);
+
+        _originalMetamethods[metamethod] = (LuaFunction)_metatable[metamethod];
+        _metatable[metamethod] = wrappedFunc;
     }
 
     /// <summary>
@@ -56,6 +46,7 @@ public class LuaUserdata
     /// </summary>
     protected virtual object Index(LuaUserdata self, object index)
     {
+        var __index = _originalMetamethods["__index"];
         return __index.Call(self, index);
     }
 
@@ -64,6 +55,7 @@ public class LuaUserdata
     /// </summary>
     protected virtual void NewIndex(LuaUserdata self, object index, object value)
     {
+        var __newindex = _originalMetamethods["__newindex"];
         __newindex.Call(self, index, value);
     }
 
@@ -74,6 +66,7 @@ public class LuaUserdata
     /// <param name="args">The arguments that were passed.</param>
     protected virtual object Call(LuaUserdata self, params object[] args)
     {
+        var __call = _originalMetamethods["__call"];
         return M_Call.Invoke(__call, [self, ..args]);
     }
 
@@ -87,7 +80,14 @@ public class LuaUserdata
 
     public object this[string index]
     {
-        get => __index.Call(this, index);
-        set => __newindex.Call(this, index, value);
+        get {
+            object result = Index(this, index);
+
+            if (result is object[] array)
+                return array[0];
+
+            return result;
+        }
+        set => NewIndex(this, index, value);
     }
 }

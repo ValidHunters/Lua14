@@ -6,12 +6,38 @@ namespace Lua14.Lua;
 public static class LuaExtensions
 {
     private const string TempPath = "_LUA14_TEMP";
+    private const string ChunkName = "LUA14";
 
-    public static void SetFunction(this NLua.Lua lua, LuaTable table, string path, MethodBase method, object target = null)
+    private const string NativeFunctionWrapper = "local a=_LUA14_TEMP;local b=table.unpack;return function(...)local c={a(...)}return b(c)end";
+    /*
+    local functionUserdata = _LUA14_TEMP
+    local unpack = table.unpack
+    return function(...)
+        local result = { functionUserdata(...) }
+        return unpack(result)
+    end
+    */
+
+    /// <summary>
+    /// When we use a c# function from lua
+    /// NLua creates a userdata with a __call and __gc metamethods.
+    /// This is used to wrap that userdata in a function.
+    /// </summary>
+    public static LuaFunction WrapFunction(this NLua.Lua lua, LuaFunction function)
     {
-        lua[TempPath] = table;
-        lua.RegisterFunction($"{TempPath}.{path}", target, method);
+        lua[TempPath] = function;
+        var result = (LuaFunction)lua.DoString(NativeFunctionWrapper, ChunkName)[0];
         lua[TempPath] = null;
+
+        return result;
+    }
+
+    public static LuaFunction CreateFunction(this NLua.Lua lua, MethodBase method, object target = null)
+    {
+        LuaFunction function = lua.RegisterFunction(TempPath, target, method);
+        lua[TempPath] = null;
+
+        return function;
     }
 
     public static LuaTable EnumerableToTable<T>(this NLua.Lua lua, IEnumerable<T> enumerable)

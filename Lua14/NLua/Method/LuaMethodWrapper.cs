@@ -345,12 +345,6 @@ namespace NLua.Method
                     luaState.Remove(1); // Pops the receiver
                 }
 
-                if (!methodToCall.IsStatic && targetObject != null && _translator.MatchParameters(luaState, methodToCall, _lastCalledMethod, -1))
-                {
-                    luaState.Remove(1); // Pops the receiver
-                    return CallInvoke(luaState, _lastCalledMethod.cachedMethod, targetObject);
-                }
-
                 if (!_translator.MatchParameters(luaState, methodToCall,  _lastCalledMethod, 0))
                 {
                     _translator.ThrowError(luaState, "Invalid arguments to method call");
