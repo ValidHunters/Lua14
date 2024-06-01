@@ -3,7 +3,7 @@ using Robust.Shared.Log;
 
 namespace Lua14.Lua;
 
-public class LuaLogger(string loggerName = "LuaLog")
+public class Logger(string loggerName = "LuaLog")
 {
     private readonly ISawmill _sw = IoCManager.Resolve<ILogManager>().GetSawmill("lua." + loggerName);
 

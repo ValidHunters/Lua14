@@ -5,7 +5,7 @@ using Robust.Shared.IoC;
 
 namespace Lua14.Lua.Libraries;
 
-public class LuaSystemLibrary(NLua.Lua lua) : LuaLibrary(lua)
+public class LuaSystemLibrary(NLua.Lua lua) : Library(lua)
 {
     [Dependency] private readonly EntityManager _entity = default!;
 

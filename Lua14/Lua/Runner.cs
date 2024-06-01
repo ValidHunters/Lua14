@@ -5,7 +5,7 @@ using Robust.Shared.Reflection;
 
 namespace Lua14.Lua;
 
-public class LuaRunner
+public class Runner
 {
     [Dependency] private readonly IReflectionManager _reflection = default!;
     [Dependency] private readonly IDependencyCollection _gameDeps = default!;
@@ -14,10 +14,10 @@ public class LuaRunner
     private readonly List<Type> _librariesTypes = [];
 
     private readonly Mod _mod;
-    private readonly LuaLogger _logger;
+    private readonly Logger _logger;
     private readonly NLua.Lua _state = new();
 
-    public LuaRunner(Mod mod)
+    public Runner(Mod mod)
     {
         IoCManager.InjectDependencies(this);
         _mod = mod;
@@ -46,11 +46,11 @@ public class LuaRunner
     {
         _deps.RegisterInstance<NLua.Lua>(_state);
         _deps.RegisterInstance<Mod>(_mod);
-        _deps.RegisterInstance<LuaLogger>(_logger);
+        _deps.RegisterInstance<Logger>(_logger);
     }
 
     private void RegisterLibs() {
-        var libs = _reflection.GetAllChildren<LuaLibrary>();
+        var libs = _reflection.GetAllChildren<Library>();
         _librariesTypes.AddRange(libs);
 
         foreach (var lib in libs)
@@ -63,7 +63,7 @@ public class LuaRunner
     private void LoadLibs() {
         foreach (var type in _librariesTypes)
         {
-            var library = (LuaLibrary)_deps.ResolveType(type);
+            var library = (Library)_deps.ResolveType(type);
 
             library.Initialize();
             library.Register();

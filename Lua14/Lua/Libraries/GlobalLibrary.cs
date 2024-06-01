@@ -4,9 +4,9 @@ using Robust.Shared.IoC;
 
 namespace Lua14.Lua.Libraries;
 
-public sealed class GlobalLibrary(NLua.Lua lua) : LuaLibrary(lua)
+public sealed class GlobalLibrary(NLua.Lua lua) : Library(lua)
 {
-    [Dependency] private readonly LuaLogger _logger = default!;
+    [Dependency] private readonly Logger _logger = default!;
     [Dependency] private readonly Mod _mod = default!;
 
     protected override string Name => "global";

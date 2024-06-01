@@ -31,7 +31,7 @@ public sealed class EntryPoint : GameShared
         {
             try
             {
-                LuaRunner runner = new(mod);
+                Runner runner = new(mod);
                 runner.ExecuteMain();
             }
             catch (Exception e)

@@ -6,7 +6,7 @@ using Lua14.Lua.Data.Structures;
 
 namespace Lua14.Lua.Libraries.Harmony;
 
-public sealed class HarmonyLibrary(NLua.Lua lua) : LuaLibrary(lua)
+public sealed class HarmonyLibrary(NLua.Lua lua) : Library(lua)
 {
     [Dependency] private readonly Mod _mod = default!;
     private HarmonyLib.Harmony _harmony = default!;

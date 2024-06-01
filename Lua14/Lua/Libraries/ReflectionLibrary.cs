@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Lua14.Lua.Libraries;
 
-public sealed class ReflectionLibrary(NLua.Lua lua) : LuaLibrary(lua)
+public sealed class ReflectionLibrary(NLua.Lua lua) : Library(lua)
 {
     [Dependency] private readonly IReflectionManager _reflection = default!;
 

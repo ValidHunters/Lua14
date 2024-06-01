@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace Lua14.Lua;
 
-public static class LuaExtensions
+public static class Extensions
 {
     private const string TempPath = "_LUA14_TEMP";
     private const string ChunkName = "LUA14";

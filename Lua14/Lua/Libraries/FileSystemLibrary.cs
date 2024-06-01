@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace Lua14.Lua.Libraries;
 
-public sealed class FileSystemLibrary(NLua.Lua lua) : LuaLibrary(lua)
+public sealed class FileSystemLibrary(NLua.Lua lua) : Library(lua)
 {
     [Dependency] private readonly IReflectionManager _reflection = default!;
     private IWritableDirProvider Data = default!;

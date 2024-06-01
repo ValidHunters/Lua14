@@ -20,7 +20,7 @@ namespace Lua14.Lua.Commands
                 )]
             );
 
-            var runner = new LuaRunner(mod);
+            var runner = new Runner(mod);
             runner.ExecuteMain();
         }
     }

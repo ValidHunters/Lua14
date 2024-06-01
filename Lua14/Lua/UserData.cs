@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace Lua14.Lua;
 
-public class LuaUserdata
+public class UserData
 {
     private static readonly MethodInfo M_Call = AccessTools.Method(typeof(LuaFunction), "Call");
 
@@ -13,7 +13,7 @@ public class LuaUserdata
     private readonly LuaTable _metatable;
     private readonly Dictionary<string, LuaFunction> _originalMetamethods = [];
 
-    public LuaUserdata(NLua.Lua state)
+    public UserData(NLua.Lua state)
     {
         Lua = state;
         _metatable = Lua.GetMetatable(this) ?? throw new Exception("No metatable found for a c# userdata.");
@@ -44,7 +44,7 @@ public class LuaUserdata
     /// <summary>
     /// Fires when table[index] is indexed.
     /// </summary>
-    protected virtual object Index(LuaUserdata self, object index)
+    protected virtual object Index(UserData self, object index)
     {
         var __index = _originalMetamethods["__index"];
         return __index.Call(self, index);
@@ -53,7 +53,7 @@ public class LuaUserdata
     /// <summary>
     /// Fires when table[index] tries to be set (table[index] = value).
     /// </summary>
-    protected virtual void NewIndex(LuaUserdata self, object index, object value)
+    protected virtual void NewIndex(UserData self, object index, object value)
     {
         var __newindex = _originalMetamethods["__newindex"];
         __newindex.Call(self, index, value);
@@ -64,7 +64,7 @@ public class LuaUserdata
     /// By default its the current object constructor.
     /// </summary>
     /// <param name="args">The arguments that were passed.</param>
-    protected virtual object Call(LuaUserdata self, params object[] args)
+    protected virtual object Call(UserData self, params object[] args)
     {
         var __call = _originalMetamethods["__call"];
         return M_Call.Invoke(__call, [self, ..args]);
@@ -73,7 +73,7 @@ public class LuaUserdata
     /// <summary>
     /// 	Used to denote a custom iterator when using generalized iteration.
     /// </summary>
-    protected virtual LuaFunction Iter(LuaUserdata self)
+    protected virtual LuaFunction Iter(UserData self)
     {
         throw new NotImplementedException();
     }

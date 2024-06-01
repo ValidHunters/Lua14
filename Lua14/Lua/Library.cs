@@ -2,7 +2,7 @@
 
 namespace Lua14.Lua;
 
-public abstract class LuaLibrary(NLua.Lua lua) : LuaUserdata(lua)
+public abstract class Library(NLua.Lua lua) : UserData(lua)
 {
     protected virtual bool CreateGlobalTable { get { return true; } }
     protected abstract string Name { get; }
