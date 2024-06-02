@@ -16,17 +16,19 @@ public sealed class DirectoryModLoader : ModLoader
             switch (extension)
             {
                 case ".lua":
-                    Stream chunkStream = File.OpenRead(file);
-                    var relativePath = GetRelativePath(path, file);
-                    Chunk chunk = ReadChunk(chunkStream, relativePath);
-                    chunks.Add(chunk);
+                    using (Stream chunkStream = File.OpenRead(file))
+                    {
+                        var relativePath = GetRelativePath(path, file);
+                        Chunk chunk = ReadChunk(chunkStream, relativePath);
+                        chunks.Add(chunk);
+                    }
                     break;
                 case ".json":
                     if (Path.GetFileNameWithoutExtension(file) != "config")
                         throw new Exception($"There was an another json file in the folder {path} (there should be only config.json)");
 
-                    Stream configStream = File.OpenRead(file);
-                    config = ReadConfig(configStream);
+                    using (Stream configStream = File.OpenRead(file))
+                        config = ReadConfig(configStream);
                     break;
                 default:
                     throw new Exception($"There was a file with a wrong extension in the folder {path} (there should be only .lua and .json files)");

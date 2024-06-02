@@ -14,9 +14,9 @@ public static class DataLoader
         var currentAssemblyPath = Assembly.GetExecutingAssembly().Location;
         var marseyModsPath = Path.GetDirectoryName(currentAssemblyPath);
         var marseyPath = Path.GetDirectoryName(marseyModsPath) ?? throw new Exception("Wrong dll path");
-        var luaModsPath = Path.Combine(marseyPath, "LuaAutoexec");
+        var luaAutoexecPath = Path.Combine(marseyPath, "LuaAutoexec");
 
-        return luaModsPath;
+        return luaAutoexecPath;
     }
 
     public static Mod[] ReadAutoexecFolder()

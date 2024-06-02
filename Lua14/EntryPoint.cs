@@ -26,7 +26,7 @@ public sealed class EntryPoint : GameShared
     {
         var mods = DataLoader.ReadAutoexecFolder();
 
-        MarseyLogger.Log(MarseyLogger.LogType.DEBG, "Started execution of all mods...");
+        MarseyLogger.Log(MarseyLogger.LogType.DEBG, "Starting execution of all mods in autoexec...");
         foreach (var mod in mods)
         {
             try

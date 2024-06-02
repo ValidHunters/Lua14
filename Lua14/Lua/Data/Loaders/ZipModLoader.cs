@@ -10,26 +10,29 @@ public sealed class ZipModLoader : ModLoader
         Config? config = null;
         List<Chunk> chunks = [];
 
-        ZipArchive zip = ZipFile.OpenRead(path);
+        using ZipArchive zip = ZipFile.OpenRead(path);
         foreach (ZipArchiveEntry entry in zip.Entries)
         {
             if (entry.IsEncrypted)
                 continue;
 
-            var extension = Path.GetExtension(entry.Name);
+            var filePath = entry.Name;
+            var extension = Path.GetExtension(filePath);
             switch (extension)
             {
                 case ".lua":
-                    Stream chunkStream = entry.Open();
-                    Chunk chunk = ReadChunk(chunkStream, entry.Name);
-                    chunks.Add(chunk);
+                    using (Stream chunkStream = entry.Open())
+                    {
+                        Chunk chunk = ReadChunk(chunkStream, filePath);
+                        chunks.Add(chunk);
+                    }
                     break;
                 case ".json":
-                    if (Path.GetFileNameWithoutExtension(entry.Name) != "config")
+                    if (Path.GetFileNameWithoutExtension(filePath) != "config")
                         throw new Exception($"There was an another json file in the zip {path} (there should be only config.json)");
 
-                    Stream configStream = entry.Open();
-                    config = ReadConfig(configStream);
+                    using (Stream configStream = entry.Open())
+                        config = ReadConfig(configStream);
                     break;
                 default:
                     throw new Exception($"There was a file with a wrong extension in the zip file {path} (there should be only .lua and .json files)");
