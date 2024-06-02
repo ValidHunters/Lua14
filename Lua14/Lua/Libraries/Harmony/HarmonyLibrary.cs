@@ -2,18 +2,18 @@
 using System.Reflection;
 using NLua;
 using Robust.Shared.IoC;
-using Lua14.Data;
+using Lua14.Lua.Data.Structures;
 
 namespace Lua14.Lua.Libraries.Harmony;
 
-public sealed class HarmonyLibrary(NLua.Lua lua) : LuaLibrary(lua)
+public sealed class HarmonyLibrary(NLua.Lua lua) : Library(lua)
 {
-    [Dependency] private readonly LuaMod _mod = default!;
+    [Dependency] private readonly Mod _mod = default!;
     private HarmonyLib.Harmony _harmony = default!;
 
     public override void Initialize()
     {
-        _harmony = new HarmonyLib.Harmony("lua." + _mod.Config.Name);
+        _harmony = new HarmonyLib.Harmony("lua." + _mod.Name);
     }
 
     protected override string Name => "harmony";
@@ -21,10 +21,10 @@ public sealed class HarmonyLibrary(NLua.Lua lua) : LuaLibrary(lua)
     [LuaMember(Name = "patch")]
     public void Patch(
         MethodBase original,
-        LuaFunction? prefix = null,
-        LuaFunction? postfix = null,
-        LuaFunction? transpiler = null,
-        LuaFunction? finalizer = null)
+        LuaFunction prefix = null,
+        LuaFunction postfix = null,
+        LuaFunction transpiler = null,
+        LuaFunction finalizer = null)
     {
         var processor = _harmony.CreateProcessor(original);
         if (prefix != null)
@@ -88,7 +88,7 @@ public sealed class HarmonyLibrary(NLua.Lua lua) : LuaLibrary(lua)
     }
 
     [LuaMember(Name = "unpatch")]
-    public void Unpatch(MethodBase original, string type = "all", string? id = null)
+    public void Unpatch(MethodBase original, string type = "all", string id = null)
     {
         switch (type)
         {
@@ -111,7 +111,7 @@ public sealed class HarmonyLibrary(NLua.Lua lua) : LuaLibrary(lua)
     }
 
     [LuaMember(Name = "unpatchAll")]
-    public void UnpatchAll(string? id = null)
+    public void UnpatchAll(string id = null)
     {
         _harmony.UnpatchAll(id ?? _harmony.Id);
     }

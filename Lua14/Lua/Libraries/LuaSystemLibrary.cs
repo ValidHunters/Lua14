@@ -1,11 +1,11 @@
-using Lua14.Systems;
+using Lua14.Lua.Systems;
 using NLua;
 using Robust.Shared.GameObjects;
 using Robust.Shared.IoC;
 
 namespace Lua14.Lua.Libraries;
 
-public class LuaSystemLibrary(NLua.Lua lua) : LuaLibrary(lua)
+public class LuaSystemLibrary(NLua.Lua lua) : Library(lua)
 {
     [Dependency] private readonly EntityManager _entity = default!;
 
@@ -51,7 +51,7 @@ public class LuaSystemLibrary(NLua.Lua lua) : LuaLibrary(lua)
         };
 	}
 
-	private static LuaFunction? GetLuaFunction(LuaTable table, string key)
+	private static LuaFunction GetLuaFunction(LuaTable table, string key)
 	{
     	if (table[key] != null && table[key] is not LuaFunction)
         	throw new Exception($"Field \"{key}\" should be a function in your system table.");
