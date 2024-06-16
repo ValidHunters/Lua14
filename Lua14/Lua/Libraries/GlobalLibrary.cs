@@ -1,10 +1,11 @@
-﻿using Lua14.Lua.Data.Structures;
-using NLua;
+﻿using Eluant;
+using Lua14.Lua.Data.Structures;
+using Lua14.Lua.Objects;
 using Robust.Shared.IoC;
 
 namespace Lua14.Lua.Libraries;
 
-public sealed class GlobalLibrary(NLua.Lua lua) : Library(lua)
+public sealed class GlobalLibrary(LuaRuntime lua) : Library(lua)
 {
     [Dependency] private readonly Logger _logger = default!;
     [Dependency] private readonly Mod _mod = default!;
@@ -12,22 +13,23 @@ public sealed class GlobalLibrary(NLua.Lua lua) : Library(lua)
     protected override string Name => "global";
     protected override bool CreateGlobalTable => false;
 
-    private readonly Dictionary<string, object[]> _loaded = [];
+    private readonly Dictionary<string, LuaVararg> _loaded = [];
 
     public override void Initialize()
     {
-        Lua["print"] = this["print"];
-        Lua["require"] = this["require"];
+        using LuaFunction printFunc = Lua.CreateFunctionFromDelegate(Print);
+        using LuaFunction requireFunc = Lua.CreateFunctionFromDelegate(Require);
+
+        Lua.Globals["print"] = printFunc;
+        Lua.Globals["require"] = requireFunc;
     }
 
-    [LuaMember(Name = "print")]
-    public void Print(params object[] values)
+    public void Print(LuaVararg vararg)
     {
-        _logger.Debug(string.Join(" ", values));
+        _logger.Debug(string.Join(" ", vararg));
     }
 
-    [LuaMember(Name = "require")]
-    public object[] Require(string path)
+    public LuaVararg Require(string path)
     {
         if (_loaded.TryGetValue(path, out var value))
         {
@@ -37,7 +39,7 @@ public sealed class GlobalLibrary(NLua.Lua lua) : Library(lua)
         if (!_mod.TryFindChunk(path, out var chunk))
             throw new Exception($"No file found with path {path}");
 
-        _loaded[path] = Lua.DoString(chunk.Content, "require_chunk");
+        _loaded[path] = Lua.DoString(chunk.Content);
         return _loaded[path];
     }
 }

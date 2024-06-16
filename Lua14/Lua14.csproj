@@ -9,6 +9,7 @@
 
     <ItemGroup>
 		<PackageReference Include="Lib.Harmony" Version="2.3.0-prerelease.4" />
+		<PackageReference Include="OpenRA-Eluant" Version="1.0.22" />
     </ItemGroup>
 
     <ItemGroup> 

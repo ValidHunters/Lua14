@@ -1,12 +1,14 @@
 ﻿using HarmonyLib;
 using System.Reflection;
-using NLua;
 using Robust.Shared.IoC;
 using Lua14.Lua.Data.Structures;
+using Lua14.Lua.Objects;
+using Eluant;
+using Eluant.ObjectBinding;
 
 namespace Lua14.Lua.Libraries.Harmony;
 
-public sealed class HarmonyLibrary(NLua.Lua lua) : Library(lua)
+public sealed class HarmonyLibrary(LuaRuntime lua) : Library(lua)
 {
     [Dependency] private readonly Mod _mod = default!;
     private HarmonyLib.Harmony _harmony = default!;
@@ -18,7 +20,7 @@ public sealed class HarmonyLibrary(NLua.Lua lua) : Library(lua)
 
     protected override string Name => "harmony";
 
-    [LuaMember(Name = "patch")]
+    [LuaMember("patch")]
     public void Patch(
         MethodBase original,
         LuaFunction prefix = null,
@@ -33,7 +35,7 @@ public sealed class HarmonyLibrary(NLua.Lua lua) : Library(lua)
                 new LuaPoolData
                 {
                     CFunction = original,
-                    Function = prefix,
+                    Function = (LuaFunction)prefix.CopyReference(),
                     Type = HarmonyPatchType.Prefix,
                     State = Lua
                 }
@@ -47,7 +49,7 @@ public sealed class HarmonyLibrary(NLua.Lua lua) : Library(lua)
                 new LuaPoolData
                 {
                     CFunction = original,
-                    Function = postfix,
+                    Function = (LuaFunction)postfix.CopyReference(),
                     Type = HarmonyPatchType.Postfix,
                     State = Lua
                 }
@@ -61,7 +63,7 @@ public sealed class HarmonyLibrary(NLua.Lua lua) : Library(lua)
                 new LuaPoolData
                 {
                     CFunction = original,
-                    Function = transpiler,
+                    Function = (LuaFunction)transpiler.CopyReference(),
                     Type = HarmonyPatchType.Transpiler,
                     State = Lua
                 }
@@ -75,7 +77,7 @@ public sealed class HarmonyLibrary(NLua.Lua lua) : Library(lua)
                 new LuaPoolData
                 {
                     CFunction = original,
-                    Function = finalizer,
+                    Function = (LuaFunction)finalizer.CopyReference(),
                     Type = HarmonyPatchType.Finalizer,
                     State = Lua
                 }
@@ -87,7 +89,7 @@ public sealed class HarmonyLibrary(NLua.Lua lua) : Library(lua)
         processor.Patch();
     }
 
-    [LuaMember(Name = "unpatch")]
+    [LuaMember("unpatch")]
     public void Unpatch(MethodBase original, string type = "all", string id = null)
     {
         switch (type)
@@ -110,7 +112,7 @@ public sealed class HarmonyLibrary(NLua.Lua lua) : Library(lua)
         }
     }
 
-    [LuaMember(Name = "unpatchAll")]
+    [LuaMember("unpatchAll")]
     public void UnpatchAll(string id = null)
     {
         _harmony.UnpatchAll(id ?? _harmony.Id);
@@ -120,8 +122,8 @@ public sealed class HarmonyLibrary(NLua.Lua lua) : Library(lua)
     {
         var (prefix, lua) = HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Prefix);
 
-        var luaData = prefix.Call(__instance, lua.EnumerableToTable(__args));
-        if (luaData.Length > 0 && luaData[0] as bool? == false)
+        using LuaVararg luaData = prefix.Call(__instance.ToLuaValue(lua), __args.ToLuaValue(lua));
+        if (luaData.Count > 0 && luaData[0] as LuaBoolean == false)
             return false;
 
         return true;
@@ -130,14 +132,18 @@ public sealed class HarmonyLibrary(NLua.Lua lua) : Library(lua)
     {
         var (postfix, lua) = HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Postfix);
 
-        postfix.Call(__instance, lua.EnumerableToTable(__args), __result);
+        postfix.Call(
+            new LuaTransparentClrObject(__instance),
+            new LuaTransparentClrObject(__args),
+            new LuaTransparentClrObject(__result)
+        );
     }
     private static IEnumerable<CodeInstruction> LuaTranspilerProxy(IEnumerable<CodeInstruction> instructions, MethodBase __originalMethod)
     {
         var (transpiler, lua) = HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Transpiler);
 
-        var luaData = transpiler.Call(lua.EnumerableToTable(instructions));
-        if (luaData.Length < 1 || luaData[0] is not LuaTable instructionsTable)
+        using LuaVararg luaData = transpiler.Call(lua.EnumerableToTable(instructions));
+        if (luaData.Count < 1 || luaData[0] is not LuaTable instructionsTable)
         {
             return instructions;
         }

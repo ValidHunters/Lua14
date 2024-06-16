@@ -1,16 +1,17 @@
 ﻿using HarmonyLib;
 using System.Reflection;
+using Eluant;
 
 namespace Lua14.Lua.Libraries.Harmony;
 
 public struct LuaPoolData
 {
-    public NLua.LuaFunction Function;
+    public LuaFunction Function;
     public MethodBase CFunction;
     public HarmonyPatchType Type;
-    public NLua.Lua State;
+    public LuaRuntime State;
 
-    public readonly void Deconstruct(out NLua.LuaFunction func, out NLua.Lua lua)
+    public readonly void Deconstruct(out LuaFunction func, out LuaRuntime lua)
     {
         func = Function;
         lua = State;

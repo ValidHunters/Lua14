@@ -1,4 +1,6 @@
-﻿using NLua;
+﻿using Eluant;
+using Eluant.ObjectBinding;
+using Lua14.Lua.Objects;
 using Robust.Shared.ContentPack;
 using Robust.Shared.IoC;
 using Robust.Shared.Reflection;
@@ -7,7 +9,7 @@ using System.Reflection;
 
 namespace Lua14.Lua.Libraries;
 
-public sealed class FileSystemLibrary(NLua.Lua lua) : Library(lua)
+public sealed class FileSystemLibrary(LuaRuntime lua) : Library(lua)
 {
     [Dependency] private readonly IReflectionManager _reflection = default!;
     private IWritableDirProvider Data = default!;
@@ -32,32 +34,32 @@ public sealed class FileSystemLibrary(NLua.Lua lua) : Library(lua)
         )!;
     }
 
-    [LuaMember(Name = "readfile")]
+    [LuaMember("readfile")]
     public string ReadFile(string path) => Data.ReadAllText(new ResPath(path));
 
-    [LuaMember(Name = "writefile")]
+    [LuaMember("writefile")]
     public void WriteFile(string path, string content) => Data.WriteAllText(new ResPath(path), content);
 
-    [LuaMember(Name = "appendfile")]
+    [LuaMember("appendfile")]
     public void AppendFile(string path, string content) => Data.AppendAllText(new ResPath(path), content);
 
-    [LuaMember(Name = "delete")]
+    [LuaMember("delete")]
     public void Delete(string path) => Data.Delete(new ResPath(path));
 
-    [LuaMember(Name = "makefolder")]
+    [LuaMember("makefolder")]
     public void MakeFolder(string path) => Data.CreateDir(new ResPath(path));
 
-    [LuaMember(Name = "isfolder")]
+    [LuaMember("isfolder")]
     public bool IsFolder(string path) => Data.IsDir(new ResPath(path));
 
-    [LuaMember(Name = "isfile")]
+    [LuaMember("isfile")]
     public bool IsFile(string path) => !IsFolder(path);
 
-    [LuaMember(Name = "listfiles")]
-    public LuaTable ListFiles(string path)
+    [LuaMember("listfiles")]
+    public LuaValue ListFiles(string path)
     {
         var entries = Data.DirectoryEntries(new ResPath(path));
 
-        return Lua.EnumerableToTable(entries);
+        return entries.ToLuaValue(Lua);
     }
 }

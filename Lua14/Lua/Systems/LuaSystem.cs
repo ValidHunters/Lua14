@@ -1,4 +1,4 @@
-using NLua;
+using Eluant;
 using Robust.Shared.GameObjects;
 
 namespace Lua14.Lua.Systems;
@@ -13,6 +13,7 @@ public class LuaSystem : EntitySystem
         foreach (var table in _systems)
         {
             table.Shutdown?.Call();
+            table.Dispose();
         }
 
         _systems.Clear();
@@ -42,10 +43,17 @@ public class LuaSystem : EntitySystem
     }
 }
 
-public struct LuaSystemTable
+public struct LuaSystemTable : IDisposable
 {
     public string Id;
     public LuaFunction Initialize;
     public LuaFunction Update;
     public LuaFunction Shutdown;
+
+    public void Dispose()
+    {
+        Initialize.Dispose();
+        Update.Dispose();
+        Shutdown.Dispose();
+    }
 }
