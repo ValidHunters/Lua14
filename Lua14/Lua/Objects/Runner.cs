@@ -1,9 +1,9 @@
-﻿using Lua14.Lua.Data.Structures;
-using NLua.Exceptions;
+﻿using Eluant;
+using Lua14.Lua.Data.Structures;
 using Robust.Shared.IoC;
 using Robust.Shared.Reflection;
 
-namespace Lua14.Lua;
+namespace Lua14.Lua.Objects;
 
 public class Runner
 {
@@ -11,11 +11,10 @@ public class Runner
     [Dependency] private readonly IDependencyCollection _gameDeps = default!;
 
     private readonly IDependencyCollection _deps;
-    private readonly List<Type> _librariesTypes = [];
 
     private readonly Mod _mod;
     private readonly Logger _logger;
-    private readonly NLua.Lua _state = new();
+    private readonly LuaRuntime _runtime = new();
 
     public Runner(Mod mod)
     {
@@ -27,41 +26,40 @@ public class Runner
 
         RegisterIoC();
         RegisterLibs();
-        LoadLibs();
         SetupSandbox();
     }
 
     private void SetupSandbox()
     {
-        _state["io"] = null;
-        _state["os"] = null;
-        _state["debug"] = null;
-        _state["luanet"] = null;
-        _state["package"] = null;
-        _state["dofile"] = null;
-        _state["load"] = null;
+        LuaGlobalsTable globals = _runtime.Globals;
+
+        globals["io"] = null;
+        globals["os"] = null;
+        globals["debug"] = null;
+        globals["luanet"] = null;
+        globals["package"] = null;
+        globals["dofile"] = null;
+        globals["load"] = null;
     }
 
     private void RegisterIoC()
     {
-        _deps.RegisterInstance<NLua.Lua>(_state);
+        _deps.RegisterInstance<LuaRuntime>(_runtime);
         _deps.RegisterInstance<Mod>(_mod);
         _deps.RegisterInstance<Logger>(_logger);
     }
 
-    private void RegisterLibs() {
+    private void RegisterLibs()
+    {
         var libs = _reflection.GetAllChildren<Library>();
-        _librariesTypes.AddRange(libs);
 
         foreach (var lib in libs)
         {
             _deps.Register(lib);
         }
         _deps.BuildGraph();
-    }
 
-    private void LoadLibs() {
-        foreach (var type in _librariesTypes)
+        foreach (var type in libs)
         {
             var library = (Library)_deps.ResolveType(type);
 
@@ -70,23 +68,13 @@ public class Runner
         }
     }
 
-    public object[] ExecuteMain()
+    public void ExecuteMain()
     {
         if (!_mod.TryFindChunk(_mod.MainFile, out var mainChunk))
             throw new Exception($"No file found with path {_mod.MainFile}");
 
-        try
-        {
-            return _state.DoString(mainChunk.Content, _mod.Name);
-        }
-        catch (LuaScriptException ex)
-        {
-            if (ex.IsNetException && ex.InnerException != null)
-            {
-                _logger.Error($"Error while executing a mod with name {_mod.Name}. Source: ${ex.Source}");
-                throw ex.InnerException;
-            }
-            throw;
-        }
+        _runtime
+            .DoString(mainChunk.Content)
+            .Dispose();
     }
 }

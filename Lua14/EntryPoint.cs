@@ -1,8 +1,8 @@
 ﻿using Lua14.Lua.Data;
-using Lua14.Lua;
 using Robust.Shared.ContentPack;
 using Robust.Shared.IoC;
 using System.Reflection;
+using Lua14.Lua.Objects;
 
 namespace Lua14;
 

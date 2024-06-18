@@ -1,11 +1,13 @@
-﻿using NLua;
+﻿using Eluant;
+using Eluant.ObjectBinding;
+using Lua14.Lua.Objects;
 using Robust.Shared.IoC;
 using Robust.Shared.Reflection;
 using System.Reflection;
 
 namespace Lua14.Lua.Libraries;
 
-public sealed class ReflectionLibrary(NLua.Lua lua) : Library(lua)
+public sealed class ReflectionLibrary(LuaRuntime lua) : Library(lua)
 {
     [Dependency] private readonly IReflectionManager _reflection = default!;
 
@@ -20,45 +22,53 @@ public sealed class ReflectionLibrary(NLua.Lua lua) : Library(lua)
 
     protected override string Name => "reflection";
 
-    [LuaMember(Name = "getType")]
-    public Type GetType(string path)
+    [LuaMember("getType")]
+    public LuaOpaqueClrObject GetType(string path)
     {
         if (path.StartsWith("System") || path.StartsWith("Lua14"))
             return null;
 
-        return _reflection.GetType(path);
+        Type type = _reflection.GetType(path);
+        return new LuaOpaqueClrObject(type);
     }
 
-    [LuaMember(Name = "getMethod")]
-    public MethodInfo GetMethod(Type type, string methodName, Type[] parameters = null)
+    [LuaMember("getMethod")]
+    public LuaOpaqueClrObject GetMethod(Type type, string methodName, Type[] parameters = null)
     {
+        MethodInfo method;
+
         if (parameters is not null)
-            return type.GetMethod(methodName, _allFlags, parameters);
+            method = type.GetMethod(methodName, _allFlags, parameters);
+        else
+            method = type.GetMethod(methodName, _allFlags);
 
-        return type.GetMethod(methodName, _allFlags);
+        return new LuaOpaqueClrObject(method);
     }
 
-    [LuaMember(Name = "getAllTypes")]
-    public LuaTable FindAllTypes()
+    [LuaMember("getAllTypes")]
+    public LuaValue FindAllTypes()
     {
-        IEnumerable<Type> types = _reflection.FindAllTypes();
-
-        return Lua.EnumerableToTable(types);
+        return _reflection
+            .FindAllTypes()
+            .Select(type => new LuaOpaqueClrObject(type))
+            .ToLuaValue(Lua);
     }
 
-    [LuaMember(Name = "findTypesWithAttribute")]
-    public LuaTable FindTypesWithAttribute(Type attribute)
+    [LuaMember("findTypesWithAttribute")]
+    public LuaValue FindTypesWithAttribute(Type attribute)
     {
-        IEnumerable<Type> types = _reflection.FindTypesWithAttribute(attribute);
-
-        return Lua.EnumerableToTable(types);
+        return _reflection
+            .FindTypesWithAttribute(attribute)
+            .Select(type => new LuaOpaqueClrObject(type))
+            .ToLuaValue(Lua);
     }
 
-    [LuaMember(Name = "getAllChildren")]
-    public LuaTable GetAllChildren(Type baseType, bool inclusive = false)
+    [LuaMember("getAllChildren")]
+    public LuaValue GetAllChildren(Type baseType, bool inclusive = false)
     {
-        IEnumerable<Type> types = _reflection.GetAllChildren(baseType, inclusive);
-
-        return Lua.EnumerableToTable(types);
+        return _reflection
+            .GetAllChildren(baseType, inclusive)
+            .Select(type => new LuaOpaqueClrObject(type))
+            .ToLuaValue(Lua);
     }
 }

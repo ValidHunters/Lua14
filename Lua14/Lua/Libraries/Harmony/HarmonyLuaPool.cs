@@ -1,19 +1,18 @@
 ﻿using HarmonyLib;
 using System.Reflection;
+using Eluant;
 
 namespace Lua14.Lua.Libraries.Harmony;
 
 public struct LuaPoolData
 {
-    public NLua.LuaFunction Function;
+    public LuaFunction Function;
     public MethodBase CFunction;
     public HarmonyPatchType Type;
-    public NLua.Lua State;
 
-    public readonly void Deconstruct(out NLua.LuaFunction func, out NLua.Lua lua)
+    public readonly void Deconstruct(out LuaFunction func)
     {
         func = Function;
-        lua = State;
     }
 }
 
@@ -21,9 +20,12 @@ public static class HarmonyLuaPool
 {
     private static readonly HashSet<LuaPoolData> _poolData = [];
 
-    public static LuaPoolData Get(MethodBase method, HarmonyPatchType type)
+    public static LuaPoolData Get(MethodBase method, HarmonyPatchType type, out LuaFunction function)
     {
-        return _poolData.Where(it => it.Type == type && it.CFunction == method).Single();
+        var ret = _poolData.Where(it => it.Type == type && it.CFunction == method).Single();
+
+        function = ret.Function;
+        return ret;
     }
     public static void Add(LuaPoolData data)
     {
