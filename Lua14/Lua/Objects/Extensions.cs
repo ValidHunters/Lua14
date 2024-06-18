@@ -195,7 +195,7 @@ public static class Extensions
             .Cast<LuaValue>()
             .ToList();
 
-        LuaVararg ret = function.Call();
+        LuaVararg ret = function.Call(args);
 
         foreach(var arg in args)
             arg.Dispose();
