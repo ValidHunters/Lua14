@@ -12,7 +12,7 @@ public class LuaSystem : EntitySystem
         base.Shutdown();
         foreach (var table in _systems)
         {
-            table.Shutdown?.Call();
+            table.Shutdown?.Call().Dispose();
             table.Dispose();
         }
 
@@ -24,7 +24,7 @@ public class LuaSystem : EntitySystem
         base.Update(frameTime);
         foreach (var table in _systems)
         {
-            table.Update?.Call(frameTime);
+            table.Update?.Call(frameTime).Dispose();
         }
     }
 
@@ -33,13 +33,14 @@ public class LuaSystem : EntitySystem
         if (_systems.Where(it => it.Id == systemTable.Id).Any())
             throw new Exception("There is already a system with this id registred.");
 
-        systemTable.Initialize?.Call();
+        systemTable.Initialize?.Call().Dispose();
         _systems.Add(systemTable);
     }
 
     public void RemoveLuaSystem(string id)
     {
-        _systems.RemoveWhere(it => it.Id == id);
+        using LuaSystemTable table = _systems.Single(it => it.Id == id);
+        _systems.Remove(table);
     }
 }
 
@@ -50,7 +51,7 @@ public struct LuaSystemTable : IDisposable
     public LuaFunction Update;
     public LuaFunction Shutdown;
 
-    public void Dispose()
+    public readonly void Dispose()
     {
         Initialize.Dispose();
         Update.Dispose();

@@ -36,8 +36,7 @@ public sealed class HarmonyLibrary(LuaRuntime lua) : Library(lua)
                 {
                     CFunction = original,
                     Function = (LuaFunction)prefix.CopyReference(),
-                    Type = HarmonyPatchType.Prefix,
-                    State = Lua
+                    Type = HarmonyPatchType.Prefix
                 }
             );
             HarmonyMethod method = new(GetType(), "LuaPrefixProxy");
@@ -50,8 +49,7 @@ public sealed class HarmonyLibrary(LuaRuntime lua) : Library(lua)
                 {
                     CFunction = original,
                     Function = (LuaFunction)postfix.CopyReference(),
-                    Type = HarmonyPatchType.Postfix,
-                    State = Lua
+                    Type = HarmonyPatchType.Postfix
                 }
             );
             HarmonyMethod method = new(GetType(), "LuaPostfixProxy");
@@ -64,8 +62,7 @@ public sealed class HarmonyLibrary(LuaRuntime lua) : Library(lua)
                 {
                     CFunction = original,
                     Function = (LuaFunction)transpiler.CopyReference(),
-                    Type = HarmonyPatchType.Transpiler,
-                    State = Lua
+                    Type = HarmonyPatchType.Transpiler
                 }
             );
             HarmonyMethod method = new(GetType(), "LuaTranspilerProxy");
@@ -78,8 +75,7 @@ public sealed class HarmonyLibrary(LuaRuntime lua) : Library(lua)
                 {
                     CFunction = original,
                     Function = (LuaFunction)finalizer.CopyReference(),
-                    Type = HarmonyPatchType.Finalizer,
-                    State = Lua
+                    Type = HarmonyPatchType.Finalizer
                 }
             );
             HarmonyMethod method = new(GetType(), "LuaFinalizerProxy");
@@ -120,39 +116,45 @@ public sealed class HarmonyLibrary(LuaRuntime lua) : Library(lua)
 
     private static bool LuaPrefixProxy(object __instance, object[] __args, MethodBase __originalMethod)
     {
-        var (prefix, lua) = HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Prefix);
+        HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Prefix, out var prefix);
 
-        using LuaVararg luaData = prefix.Call(__instance.ToLuaValue(lua), __args.ToLuaValue(lua));
-        if (luaData.Count > 0 && luaData[0] as LuaBoolean == false)
-            return false;
+        using LuaVararg functionResult = prefix.Call(__instance, __args);
+        if (functionResult.Count > 0)
+        {
+            using LuaBoolean prefixResult = functionResult[0] as LuaBoolean;
+            if (prefixResult == false)
+                return false;
+        }
 
         return true;
     }
+
     private static void LuaPostfixProxy(object __instance, object[] __args, ref object __result, MethodBase __originalMethod)
     {
-        var (postfix, lua) = HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Postfix);
+        HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Postfix, out var postfix);
 
-        postfix.Call(
-            new LuaTransparentClrObject(__instance),
-            new LuaTransparentClrObject(__args),
-            new LuaTransparentClrObject(__result)
-        );
+        postfix.Call(__instance, __args, __result);
     }
+
     private static IEnumerable<CodeInstruction> LuaTranspilerProxy(IEnumerable<CodeInstruction> instructions, MethodBase __originalMethod)
     {
-        var (transpiler, lua) = HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Transpiler);
+        HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Transpiler, out var transpiler);
 
-        using LuaVararg luaData = transpiler.Call(lua.EnumerableToTable(instructions));
-        if (luaData.Count < 1 || luaData[0] is not LuaTable instructionsTable)
+        using LuaVararg functionResult = transpiler.Call(instructions);
+        if (functionResult.Count > 0)
         {
-            return instructions;
+            using LuaValue transpilerResult = functionResult[0];
+
+            if (transpilerResult.TryGetClrValue<CodeInstruction[]>(out var luaInstructions))
+                return luaInstructions;
         }
 
-        return lua.TableToEnumerable<CodeInstruction>(instructionsTable) ?? instructions;
+        return instructions;
     }
+
     private static void LuaFinalizerProxy(Exception __exception, MethodBase __originalMethod)
     {
-        var (finalizer, _) = HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Finalizer);
+        HarmonyLuaPool.Get(__originalMethod, HarmonyPatchType.Finalizer, out var finalizer);
 
         finalizer.Call(__exception);
     }

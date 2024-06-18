@@ -1,8 +1,11 @@
 ﻿using Eluant;
+using Eluant.ObjectBinding;
+using HarmonyLib;
+using Lua14.Lua.Objects.CLR;
 
 namespace Lua14.Lua.Objects;
 
-interface IRuntimeBindable { }
+interface ILuaBindable { }
 
 public static class Extensions
 {
@@ -155,10 +158,11 @@ public static class Extensions
                 return s;
         }
 
-        if (obj is IRuntimeBindable)
-        {
+        if (obj is ILuaBindable)
             return new LuaCustomClrObject(obj);
-        }
+
+        if (obj is IEnumerable<LuaValue> enumerable)
+            return runtime.CreateTable(enumerable);
 
         if (obj is Array array)
         {
@@ -172,6 +176,30 @@ public static class Extensions
             return table;
         }
 
-        throw new InvalidOperationException($"Cannot convert type '{obj.GetType()}' to Lua. Class must implement IRuntimeBindable.");
+        throw new InvalidOperationException($"Cannot convert type '{obj.GetType()}' to Lua. Class must implement ILuaBindable.");
+    }
+
+    private static readonly BasicBindingSecurityPolicy _securityPolicy = new(MemberSecurityPolicy.Permit);
+    private static readonly MemberNameLuaBinder _binder = new(AccessTools.all);
+
+    public static LuaTransparentClrObject AsClrObj(this object obj) 
+    {
+        return new(obj, _binder, _securityPolicy);
+    }
+
+    public static LuaVararg Call(this LuaFunction function, params object[] arguments)
+    {
+        IList<LuaValue> args = 
+            arguments
+            .Select(AsClrObj)
+            .Cast<LuaValue>()
+            .ToList();
+
+        LuaVararg ret = function.Call();
+
+        foreach(var arg in args)
+            arg.Dispose();
+
+        return ret;
     }
 }

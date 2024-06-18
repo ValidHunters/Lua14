@@ -2,6 +2,7 @@
 
 using Content.Shared.Administration;
 using Lua14.Lua.Data.Structures;
+using Lua14.Lua.Objects;
 using Robust.Shared.Console;
 
 namespace Lua14.Lua.Commands

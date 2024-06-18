@@ -21,6 +21,7 @@ public abstract class Library
         if (!CreateGlobalTable)
             return;
 
-        Lua.Globals[Name] = new LuaTransparentClrObject(this);
+        using LuaTransparentClrObject library = new(this);
+        Lua.Globals[Name] = library;
     }
 }
