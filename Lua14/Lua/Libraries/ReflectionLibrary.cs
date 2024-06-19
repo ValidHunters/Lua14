@@ -23,19 +23,19 @@ public sealed class ReflectionLibrary(LuaRuntime lua) : Library(lua)
     protected override string Name => "reflection";
 
     [LuaMember("getType")]
-    public LuaOpaqueClrObject GetType(string path)
+    public LuaOpaqueClrObject? GetType(string path)
     {
         if (path.StartsWith("System") || path.StartsWith("Lua14"))
             return null;
 
-        Type type = _reflection.GetType(path);
+        Type? type = _reflection.GetType(path);
         return new LuaOpaqueClrObject(type);
     }
 
     [LuaMember("getMethod")]
-    public LuaOpaqueClrObject GetMethod(Type type, string methodName, Type[] parameters = null)
+    public LuaOpaqueClrObject GetMethod(Type type, string methodName, Type[]? parameters = null)
     {
-        MethodInfo method;
+        MethodInfo? method;
 
         if (parameters is not null)
             method = type.GetMethod(methodName, _allFlags, parameters);

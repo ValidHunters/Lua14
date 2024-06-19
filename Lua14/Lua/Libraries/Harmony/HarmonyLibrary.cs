@@ -23,10 +23,10 @@ public sealed class HarmonyLibrary(LuaRuntime lua) : Library(lua)
     [LuaMember("patch")]
     public void Patch(
         MethodBase original,
-        LuaFunction prefix = null,
-        LuaFunction postfix = null,
-        LuaFunction transpiler = null,
-        LuaFunction finalizer = null)
+        LuaFunction? prefix = null,
+        LuaFunction? postfix = null,
+        LuaFunction? transpiler = null,
+        LuaFunction? finalizer = null)
     {
         var processor = _harmony.CreateProcessor(original);
         if (prefix != null)
@@ -86,7 +86,7 @@ public sealed class HarmonyLibrary(LuaRuntime lua) : Library(lua)
     }
 
     [LuaMember("unpatch")]
-    public void Unpatch(MethodBase original, string type = "all", string id = null)
+    public void Unpatch(MethodBase original, string type = "all", string? id = null)
     {
         switch (type)
         {
@@ -109,7 +109,7 @@ public sealed class HarmonyLibrary(LuaRuntime lua) : Library(lua)
     }
 
     [LuaMember("unpatchAll")]
-    public void UnpatchAll(string id = null)
+    public void UnpatchAll(string? id = null)
     {
         _harmony.UnpatchAll(id ?? _harmony.Id);
     }
@@ -121,7 +121,7 @@ public sealed class HarmonyLibrary(LuaRuntime lua) : Library(lua)
         using LuaVararg functionResult = prefix.Call(__instance, __args);
         if (functionResult.Count > 0)
         {
-            using LuaBoolean prefixResult = functionResult[0] as LuaBoolean;
+            using LuaBoolean? prefixResult = functionResult[0] as LuaBoolean;
             if (prefixResult == false)
                 return false;
         }

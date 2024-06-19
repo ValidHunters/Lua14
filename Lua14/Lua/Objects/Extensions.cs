@@ -2,6 +2,7 @@
 using Eluant.ObjectBinding;
 using HarmonyLib;
 using Lua14.Lua.Objects.CLR;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Lua14.Lua.Objects;
 
@@ -17,14 +18,15 @@ public static class Extensions
         return value.GetType();
     }
 
-    public static bool TryGetClrValue<T>(this LuaValue value, out T clrObject)
+    public static bool TryGetClrValue<T>(this LuaValue value, [NotNullWhen(true)] out T? clrObject)
     {
         var ret = value.TryGetClrValue(typeof(T), out var temp);
-        clrObject = ret ? (T)temp : default;
+        clrObject = ret ? (T)temp! : default;
+
         return ret;
     }
 
-    public static bool TryGetClrValue(this LuaValue value, Type t, out object clrObject)
+    public static bool TryGetClrValue(this LuaValue value, Type t, [NotNullWhen(true)] out object? clrObject)
     {
         // Is t a nullable?
         // If yes, get the underlying type
@@ -41,7 +43,7 @@ public static class Extensions
 
         if (value is LuaNil && !t.IsValueType)
         {
-            clrObject = null;
+            clrObject = default!;
             return true;
         }
 
@@ -51,11 +53,11 @@ public static class Extensions
             return true;
         }
 
-        if (value is LuaNumber)
+        if (value is LuaNumber number)
         {
             if (t.IsAssignableFrom(typeof(double)))
             {
-                clrObject = value.ToNumber().Value;
+                clrObject = number.Value;
                 return true;
             }
 
@@ -63,19 +65,19 @@ public static class Extensions
             // TODO: Lua 5.3 will introduce an integer type, so this will be able to go away
             if (t.IsAssignableFrom(typeof(int)))
             {
-                clrObject = (int)value.ToNumber().Value;
+                clrObject = (int)number.Value;
                 return true;
             }
 
             if (t.IsAssignableFrom(typeof(short)))
             {
-                clrObject = (short)value.ToNumber().Value;
+                clrObject = (short)number.Value;
                 return true;
             }
 
             if (t.IsAssignableFrom(typeof(byte)))
             {
-                clrObject = (byte)value.ToNumber().Value;
+                clrObject = (byte)number.Value;
                 return true;
             }
         }
@@ -101,7 +103,7 @@ public static class Extensions
         // Translate LuaTable<int, object> -> object[]
         if (value is LuaTable table && t.IsArray)
         {
-            var innerType = t.GetElementType();
+            var innerType = t.GetElementType()!;
             var array = Array.CreateInstance(innerType, table.Count);
             var i = 0;
 
@@ -109,7 +111,7 @@ public static class Extensions
             {
                 using (kv.Key)
                 {
-                    object element;
+                    object? element;
                     if (innerType == typeof(LuaValue))
                         element = kv.Value;
                     else
@@ -138,25 +140,23 @@ public static class Extensions
 
     public static LuaValue ToLuaValue(this object obj, LuaRuntime runtime)
     {
-        {
-            if (obj is LuaValue v)
-                return v;
+        if (obj is LuaValue v)
+            return v;
 
-            if (obj == null)
-                return LuaNil.Instance;
+        if (obj == null)
+            return LuaNil.Instance;
 
-            if (obj is double d)
-                return d;
+        if (obj is double d)
+            return d;
 
-            if (obj is int i)
-                return i;
+        if (obj is int integer)
+            return integer;
 
-            if (obj is bool b)
-                return b;
+        if (obj is bool b)
+            return b;
 
-            if (obj is string s)
-                return s;
-        }
+        if (obj is string s)
+            return s;
 
         if (obj is ILuaBindable)
             return new LuaCustomClrObject(obj);

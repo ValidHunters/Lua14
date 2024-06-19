@@ -32,7 +32,7 @@ namespace Lua14.Lua.Objects.CLR
 
                 var memberName = member.Name;
 
-                if (!membersByName.TryGetValue(memberName, out List<MemberInfo> members))
+                if (!membersByName.TryGetValue(memberName, out List<MemberInfo>? members))
                 {
                     members = [];
                     membersByName[memberName] = members;
@@ -53,7 +53,7 @@ namespace Lua14.Lua.Objects.CLR
 
             var type = targetObject.GetType();
 
-            MemberNameMap memberNameMap;
+            MemberNameMap? memberNameMap;
 
             lock (memberNameCache) {
                 if (!memberNameCache.TryGetValue(type, out memberNameMap)) {
@@ -62,7 +62,7 @@ namespace Lua14.Lua.Objects.CLR
                 }
             }
 
-            if (memberNameMap.TryGetValue(memberName, out List<MemberInfo> members))
+            if (memberNameMap.TryGetValue(memberName, out List<MemberInfo>? members))
             {
                 return new ReadOnlyCollection<MemberInfo>(members);
             }

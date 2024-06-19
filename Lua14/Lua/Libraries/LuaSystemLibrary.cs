@@ -53,7 +53,7 @@ public class LuaSystemLibrary(LuaRuntime lua) : Library(lua)
         };
 	}
 
-	private static LuaFunction GetLuaFunction(LuaTable table, string key)
+	private static LuaFunction? GetLuaFunction(LuaTable table, string key)
 	{
     	if (table[key] != null && table[key] is not LuaFunction)
         	throw new LuaException($"Field \"{key}\" should be a function in your system table.");

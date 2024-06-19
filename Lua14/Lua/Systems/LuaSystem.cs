@@ -47,14 +47,14 @@ public class LuaSystem : EntitySystem
 public struct LuaSystemTable : IDisposable
 {
     public string Id;
-    public LuaFunction Initialize;
-    public LuaFunction Update;
-    public LuaFunction Shutdown;
+    public LuaFunction? Initialize;
+    public LuaFunction? Update;
+    public LuaFunction? Shutdown;
 
     public readonly void Dispose()
     {
-        Initialize.Dispose();
-        Update.Dispose();
-        Shutdown.Dispose();
+        Initialize?.Dispose();
+        Update?.Dispose();
+        Shutdown?.Dispose();
     }
 }
